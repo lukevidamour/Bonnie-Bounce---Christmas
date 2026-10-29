@@ -49,7 +49,8 @@
      rider. Left at the bottom a while, it goes back up for another go. */
   var sledge = function (L, x, row, ride, slope) {
     L.ground(x - 6, x + 4, row + 1);
-    for (var k = 4; k < ride + 4; k++) { var r = Math.ceil(row + (k - 3) / ride * slope + 2.2); if (r < 16) L.ground(x + k, x + k + 1, r); }
+    // (all the way down to the ground at its foot: walk down it instead of riding and there's no gap at the bottom — the stuck hunt found one)
+    for (var k = 4; k < ride + 4; k++) { var r = Math.ceil(row + (k - 3) / ride * slope + 2.2); L.ground(x + k, x + k + 1, Math.min(16, r)); }
     L.plat(x, row, 4, { ride: ride, slope: slope, look: 'sledge', speed: 0.9 });
   };
   // a street lamp that comes on as you pass (Town Lights)

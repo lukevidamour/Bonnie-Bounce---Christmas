@@ -6166,7 +6166,8 @@
     if (mapWalk) {
       // (on the way to somewhere further along, he hurries through the stops in between)
       mapWalk.t += mapGoal && mapGoal !== mapWalk.to ? 3 : 1;
-      var a = nodePos(mapWalk.from - 1), b = nodePos(mapWalk.to - 1), dist = Math.abs(b.x - a.x), k = Math.min(1, mapWalk.t * 1.1 / dist);
+      // (by the real length of the leg: on Guernsey's map some go more up than along)
+      var a = nodePos(mapWalk.from - 1), b = nodePos(mapWalk.to - 1), dist = Math.max(1, Math.hypot(b.x - a.x, b.y - a.y)), k = Math.min(1, mapWalk.t * 1.1 / dist);
       mapX = a.x + (b.x - a.x) * k;
       mapY = a.y + (b.y - a.y) * k - Math.sin(k * Math.PI) * 4;
       if (mapWalk.t % 12 === 1) sfx('step');
