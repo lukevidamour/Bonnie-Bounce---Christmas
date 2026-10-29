@@ -70,7 +70,12 @@ dot on the finished ones. Tap one and you're there.
 
 ## Who's playing
 
-Seven of the family, chosen on the sticker book's **WHO'S PLAYING?** page:
+Seven of the family. A new game starts by asking **WHO'S PLAYING?**, so
+Beau and Winnie begin as themselves, not as Bonnie. Tap yourself: you
+cheer, sparkles burst, HELLO BEAU!, and a moment later the story starts
+with you in it. Tapped the wrong one? Tap the right one before it goes,
+or tap the same one again to go at once. On a keyboard it's ◀ ▶, then OK.
+You can swap any time on the same page in the sticker book:
 
 - **Bonnie**, 6
 - **Beau**, 8, and **Winnie**, 5, his cousins
@@ -356,6 +361,9 @@ What it found, and what changed:
 - **Names:** Lucy and Luke are Aunty Lucy and Uncle Luke whoever is
   playing, as Grace and Ollie are Aunty Grace and Uncle Ollie, so it's as
   much Beau and Winnie's game as Bonnie's.
+- **Starting as yourself:** a new game asks WHO'S PLAYING? before the
+  story (above). The story now ignores taps for its first moment, so an
+  excited second tap on yourself doesn't skip it.
 
 The responsive audit (`tools/qa/audit.py`, 23 sizes from 280×653 to
 1920×1080) passes with nothing to fix. Its "loaded" check used to need

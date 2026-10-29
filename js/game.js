@@ -5918,12 +5918,59 @@
   };
   var menuAt = 0;
   var newGame = function () {
-    var won = save.won;
+    var won = save.won, was = who();
     save = fresh();
     save.won = won;
     if (/[?&]debug\b/.test(qs)) save.unlocked = BB.LEVELS.length;
     store();
-    wipeTo(function () { go('story'); });  // …which goes straight on into Level 1
+    pickAt = Math.max(0, WHO.indexOf(was)); picked = false;
+    wipeTo(function () { go('pick'); });  // who's playing, then the story, which goes straight on into Level 1
+  };
+  /* ---- WHO'S PLAYING? at the start of a new game ------------------------------------
+     So Beau and Winnie (or anyone) start as themselves, not as Bonnie
+     (Luke, 29 Oct): the sticker book's page, on its own. Tap yourself —
+     you cheer, sparkles burst, HELLO BEAU! — and a moment later the story
+     starts with you in it. Tapped the wrong one? Tap the right one before
+     it goes (or tap the same one again to go at once). On keys, ◀ ▶ (and
+     ▲ ▼ between the rows) then OK. */
+  var pickAt = 0, picked = false, pickT = 0;
+  var updatePick = function () {
+    sceneT++;
+    if (wipe || sceneT < 12) return;
+    var choose = function (i) { pickAt = i; save.who = WHO[i]; store(); picked = true; pickT = 0; sfx('power'); };
+    playerCells().forEach(function (c) {
+      if (!tapIn(c.x, c.y, c.cw, c.h)) return;
+      if (picked && c.i === pickAt && pickT > 10) pickT = 999; else choose(c.i);
+    });
+    if (!picked || pickT < 999) {
+      var n = WHO.length, was = pickAt;
+      if (BB.hit('left')) pickAt = (pickAt + n - 1) % n;
+      if (BB.hit('right')) pickAt = (pickAt + 1) % n;
+      if (BB.hit('up') && pickAt > 2) pickAt = Math.min(2, pickAt - 3);
+      if (BB.hit('down') && pickAt < 3) pickAt = pickAt + 3;
+      if (pickAt !== was) { if (picked) choose(pickAt); else sfx('select'); }
+      if (BB.hit('a') || BB.hit('start')) { if (picked && pickT > 10) pickT = 999; else if (!picked) choose(pickAt); }
+    }
+    if (picked && ++pickT > 75) { pickT = 0; wipeTo(function () { go('story'); }); }
+  };
+  var drawPick = function (ctx) {
+    var W = BB.W, kb = BB.inputMode !== 'touch', on = picked || kb ? WHO[pickAt] : null;
+    ctx.fillStyle = '#5a3a6a'; ctx.fillRect(0, 0, W, H);
+    UI.paper(ctx, 2, 4, W - 4, H - 8);
+    UI.ribbon(ctx, W / 2, 1, "WHO'S PLAYING?", PAGE_COL.players);
+    drawPlayerCells(ctx, on);
+    if (picked) {
+      // HELLO, and a burst of sparkles round whoever it is
+      BB.text(ctx, 'HELLO ' + nameOf(WHO[pickAt]) + '!', W / 2, 18, { color: PICK, align: 'center' });
+      var c = playerCells()[pickAt], cx = c.x + c.cw / 2, cy = c.y + 18, k = Math.min(pickT, 40);
+      if (!reduce && pickT < 40) for (var i = 0; i < 10; i++) {
+        var a = i / 10 * Math.PI * 2 + k * 0.03, r = 6 + k * 0.5;
+        ctx.globalAlpha = 1 - k / 40; ctx.fillStyle = BURST_COL[i % BURST_COL.length];
+        ctx.fillRect(snap(cx + Math.cos(a) * r - 1), snap(cy + Math.sin(a) * r * 0.8 - 1), 2, 2);
+        ctx.globalAlpha = 1;
+      }
+    } else if (kb) BB.prompt(ctx, [['t', 'WHO ARE YOU?'], ['g', 'move'], ['g', 'ok']], W / 2, 18, { align: 'center', color: INK, shadow: null });
+    else BB.text(ctx, 'TAP WHO YOU ARE!', W / 2, 18, { color: INK, align: 'center' });
   };
   // the title's world: St Peter Port at dusk on Christmas Eve (backdropx2.js), or the hills if it isn't painted
   var titleTheme = function () { return A.themes.xtitle ? 'xtitle' : 'hills'; };
@@ -6049,7 +6096,8 @@
     if (t === 150) sfx('squawk');
     if (t === 196) sfx('squawk');
     if (t === 250) { sfx('boom'); }
-    if ((sceneT > 20 && (BB.hit('a') || BB.hit('start') || BB.tap)) || sceneT > STORY_T) {
+    // (a tap skips it, but not in its first moments: an excited second tap on WHO'S PLAYING? mustn't skip the whole story)
+    if ((sceneT > 75 && (BB.hit('a') || BB.hit('start') || BB.tap)) || sceneT > STORY_T) {
       save.seenStory = true; save.at = 1; store(); sfx('start'); cardCheck = false; bearWith = 0; princeWith = 0; palsWith = null; dogWith = 0;
       wipeTo(function () { go('card'); });
     }
@@ -6409,13 +6457,33 @@
   var PAGE_NAME = { friends: 'FRIENDS', players: "WHO'S PLAYING?", creatures: 'CREATURES', advent: 'ADVENT CALENDAR', outfits: 'OUTFITS', outfits2: 'OUTFITS' };
   var PAGE_COL = { friends: '#e86aa4', players: '#e8504a', creatures: '#46a83e', advent: '#d8283a', outfits: '#4a96dc', outfits2: '#4a96dc' };
   // the players' cells: the three children in the top row, the four grown-ups under them
+  // (the book keeps 10 each side clear for its page arrows; the new game's page has none, so on a narrow screen it spreads out)
   var playerCells = function () {
-    var W = BB.W, out = [];
+    var W = BB.W, out = [], edge = scene === 'pick' ? 8 : 20;
     WHO.forEach(function (w, i) {
-      var row = i < 3 ? 0 : 1, n = row ? 4 : 3, k = row ? i - 3 : i, cw = Math.min(row ? 54 : 64, (W - 20) / n), x0 = W / 2 - cw * n / 2;
+      var row = i < 3 ? 0 : 1, n = row ? 4 : 3, k = row ? i - 3 : i, cw = Math.min(row ? 54 : 64, (W - edge) / n), x0 = W / 2 - cw * n / 2;
       out.push({ w: w, i: i, x: x0 + k * cw, y: row ? 76 : 24, cw: cw, h: 50 });
     });
     return out;
+  };
+  /* Everyone, big, on a strip of snow, their names under them: the
+     sticker book's WHO'S PLAYING? page and the same page at the start of
+     a new game. `on` (or nobody) is the chosen one: cheering, hopping,
+     named in the pick colour, with the pudding pointing at them. */
+  var drawPlayerCells = function (ctx, on) {
+    var gt = theme(titleTheme());
+    playerCells().forEach(function (c) {
+      var P = A.player ? A.player(c.w) : A.bonnie, me = on === c.w, f = me ? P.b.cheer : P.b.idle, cx = c.x + c.cw / 2, feet = c.y + 32;
+      for (var gx = -12; gx < 12; gx += 8) BB.draw(ctx, gt.top[((gx + 16) >> 3) & 1], snap(cx + gx), feet);
+      var hop = me && !reduce ? -Math.round(Math.abs(Math.sin(sceneT * 0.1)) * 2) : 0;
+      BB.draw(ctx, f, snap(cx - f.w / 2), feet - f.h + hop, false, outfit().v);
+      drawHat(ctx, outfit().hat, snap(cx - f.w / 2), feet - f.h + hop, f.w, f.h, f, false);
+      var nm = nameOf(c.w), parts = nm.split(' ');
+      if (BB.textW(nm) > c.cw - 2 && parts.length > 1) { BB.text(ctx, parts[0], cx, feet + 9, { color: me ? PICK : INK, align: 'center' }); BB.text(ctx, parts.slice(1).join(' '), cx, feet + 16, { color: me ? PICK : INK, align: 'center' }); }
+      else BB.text(ctx, nm, cx, feet + 9, { color: me ? PICK : INK, align: 'center' });
+      // the pudding pointing at whoever's chosen, beside them (above, it would sit on the words)
+      if (me) UI.cursor(ctx, snap(cx - f.w / 2 - UI.head.w - 2), snap(feet - f.h / 2 - UI.head.h / 2), tick);
+    });
   };
   // the pictures behind the advent calendar's doors, one for each day
   var ADVENT_PIC = function (d) {
@@ -6561,20 +6629,7 @@
       BB.text(ctx, 'BEAR: ' + gotB + '/' + L, W / 2, 20, { color: INK, align: 'center' });
       BB.text(ctx, 'PRINCE: ' + gotP + '/' + L, W / 2, 64, { color: INK, align: 'center' });
     } else if (pg === 'players') {
-      // everyone, big, on a strip of snow: tap one to play as them (named the way the one playing would)
-      var gt = theme(titleTheme());
-      playerCells().forEach(function (c) {
-        var P = A.player ? A.player(c.w) : A.bonnie, on = who() === c.w, f = on ? P.b.cheer : P.b.idle, cx = c.x + c.cw / 2, feet = c.y + 32;
-        for (var gx = -12; gx < 12; gx += 8) BB.draw(ctx, gt.top[((gx + 16) >> 3) & 1], snap(cx + gx), feet);
-        var hop = on && !reduce ? -Math.round(Math.abs(Math.sin(sceneT * 0.1)) * 2) : 0;
-        BB.draw(ctx, f, snap(cx - f.w / 2), feet - f.h + hop, false, outfit().v);
-        drawHat(ctx, outfit().hat, snap(cx - f.w / 2), feet - f.h + hop, f.w, f.h, f, false);
-        var nm = nameOf(c.w), parts = nm.split(' ');
-        if (BB.textW(nm) > c.cw - 2 && parts.length > 1) { BB.text(ctx, parts[0], cx, feet + 9, { color: on ? PICK : INK, align: 'center' }); BB.text(ctx, parts.slice(1).join(' '), cx, feet + 16, { color: on ? PICK : INK, align: 'center' }); }
-        else BB.text(ctx, nm, cx, feet + 9, { color: on ? PICK : INK, align: 'center' });
-        // the pudding pointing at whoever's chosen, beside them (above, it would sit on the words)
-        if (on) UI.cursor(ctx, snap(cx - f.w / 2 - UI.head.w - 2), snap(feet - f.h / 2 - UI.head.h / 2), tick);
-      });
+      drawPlayerCells(ctx, who());
       BB.text(ctx, BB.inputMode === 'touch' ? 'TAP WHO YOU WANT TO BE' : 'CHOOSE WHO YOU WANT TO BE', W / 2, 18, { color: INK, align: 'center' });
     } else if (pg === 'creatures') {
       var met = 0, cols = W > 200 ? 6 : 4, cw2 = (W - 24) / cols, rowsN = Math.ceil(STICKER_ORDER.length / cols), rh = Math.min(36, 96 / rowsN);
@@ -6942,6 +6997,7 @@
     switch (scene) {
       case 'title': updateTitle(); break;
       case 'menu': bounceTitle(); updateMenu(); break;
+      case 'pick': updatePick(); break;
       case 'story': updateStory(); break;
       case 'map': updateMap(); break;
       case 'card': updateCard(); break;
@@ -6961,6 +7017,7 @@
     switch (scene) {
       case 'title': drawTitle(ctx); break;
       case 'menu': drawMenu(ctx); break;
+      case 'pick': drawPick(ctx); break;
       case 'story': drawStory(ctx); break;
       case 'map': drawMap(ctx); break;
       case 'card': drawCard(ctx); break;
