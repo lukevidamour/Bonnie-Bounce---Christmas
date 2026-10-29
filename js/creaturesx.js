@@ -556,6 +556,58 @@
     P('x', or(ell(6, 3, 3, 2), ell(12, 3, 3, 2), ell(9, 3.4, 1.4, 1.4)), orb(8, 2, 5, 3, RED), 'v')
   ]);
 
+  /* Grabby Gus's nest (the Cup and Saucer, on the wreck's deck): a great
+     twiggy bowl heaped with everything shiny he's pinched — gold tinsel,
+     a red bauble, bottle tops, a spoon, the paper crowns his gulls
+     snatched, a chip packet (he does love chips) — and the clue, a little
+     ferry ticket with a blue stripe: he's off to Sark. 64 x 34. */
+  var TWIG = ramp(['#3a220e', '#5e3a1a', '#86582a', '#ac7a3e', '#d0a060']);   // the nest's woven twigs
+  var crownAt = function (x, y, w) {
+    return or(rrect(x, y + 3, x + w, y + 6, 0.6), tri(x, y + 4, x + w * 0.2, y - 0.5, x + w * 0.4, y + 4),
+      tri(x + w * 0.3, y + 4, x + w * 0.5, y - 1.5, x + w * 0.7, y + 4), tri(x + w * 0.6, y + 4, x + w * 0.8, y - 0.5, x + w, y + 4));
+  };
+  A.gusnest = build(64, 34, [
+    // the loot, heaped up in the bowl (drawn first: the bowl's rim is in front of it)
+    P(GOLD[2], ell(32, 18, 25, 8), function (x, y) { return (x * 3 + y * 7) % 11 < 2 ? GOLD[4] : (x + y) % 5 === 0 ? GOLD[3] : GOLD[2]; }, GOLD[0]),
+    P('C', crownAt(9, 9, 13), orb(14, 9, 8, 4, GOLD), 'B'),
+    P('r', crownAt(38, 7, 12), function (x, y) { return y < 9 ? 's' : 'r'; }, 'q'),
+    P(']', crownAt(24, 12, 10), function (x, y) { return y < 14 ? '}' : ']'; }, '['),
+    // a red bauble with its cap, and a shine
+    P('x', ell(30, 9, 5, 5), orb(28.5, 7.5, 5, 5, RED), 'v'),
+    P(IRON[3], rrect(28.6, 2.6, 31.4, 4.6, 0.5), null, IRON[1]),
+    // a spoon, leaning in
+    P(IRON[3], or(ell(50, 6, 2.4, 3.2), limb([[50, 9], [54, 18]], 0.8)), orb(49, 5, 3, 4, IRON), IRON[1]),
+    // a chip packet: red and white stripes, chips poking out
+    P('x', rrect(17, 13, 25, 21, 0.8), function (x, y) { return Math.floor((x + 0.5) / 2) % 2 ? 'w' : 'x'; }, 'v'),
+    P(GOLD[3], or(rrect(18, 10, 19.4, 14, 0.3), rrect(20.6, 9, 22, 14, 0.3), rrect(23, 10.5, 24.4, 14, 0.3)), null, GOLD[1]),
+    // the clue: a ferry ticket, white with a blue stripe
+    P(BOAT[3], turned(rrect(41, 13, 52, 19, 0.6), 46.5, 16, -0.25), function (x, y) { var yy = y + 0.5 - 16 + (x + 0.5 - 46.5) * 0.25; return Math.abs(yy) < 1 ? POST[2] : BOAT[3]; }, BOAT[0]),
+    // bottle tops
+    P(GOLD[3], or(ell(56, 15, 2.2, 1.6), ell(6.5, 16, 2.2, 1.6)), orb(55, 14, 3, 2, GOLD), GOLD[0]),
+    // the nest: a scruffy bowl of twigs going every which way, its edge ragged
+    P(TWIG[2], function (x, y) {
+      var rx = 31 + (hash(Math.floor(y), 3) - 0.5) * 3, top = 17.6 + (hash(Math.floor(x), 4) - 0.5) * 2.4;
+      return y > top && ell(32, 21.4, rx, 12.4)(x, y);
+    }, function (x, y) {
+      var X = x + 0.5, Y = y + 0.5;
+      var a = ((X * 0.9 + Y * 1.8 + hash(Math.floor(Y / 3), 0, 1) * 7) % 4.2 + 4.2) % 4.2 < 1.1;
+      var b = ((X * 1.4 - Y * 1.1 + hash(Math.floor(X / 4), 1, 2) * 6) % 5 + 5) % 5 < 1;
+      if (Y > 30.5) return TWIG[0];
+      return a ? (hash(x, y, 5) > 0.5 ? TWIG[4] : TWIG[3]) : b ? TWIG[0] : hash(x, y, 6) > 0.7 ? TWIG[1] : TWIG[2];
+    }, TWIG[0]),
+    // gold tinsel draped over the front of it
+    P(GOLD[3], limb([[7, 22], [13, 25], [19, 23], [25, 26.4], [31, 24], [37, 26.6], [43, 24.2], [49, 26], [55, 22.6]], 1.5),
+      function (x, y) { return hash(x, y, 7) > 0.55 ? GOLD[4] : GOLD[3]; }, GOLD[1], GOLD[1]),
+    // twigs poking out all round the rim
+    P(TWIG[3], or.apply(null, [[3, 18, -3, -2], [9, 16.6, -1.5, -4], [17, 17.4, 1, -4.5], [27, 16.6, -1, -3.6], [36, 16.8, 2, -4], [45, 17, 1.5, -3.8],
+      [53, 17.2, 3, -3], [60, 19, 3.5, -1.5], [1.6, 25, -3, 1], [62.4, 25, 3, 0.6], [20, 32.4, -1.5, 2], [44, 32.2, 2, 2]].map(function (t) {
+        return limb([[t[0], t[1]], [t[0] + t[2], t[1] + t[3]]], 0.6);
+      })), null, TWIG[0]),
+    // two of Gus's own feathers, grey and white, tucked in
+    P(GULLW[2], turned(ell(5, 15.6, 1.6, 4.2), 5, 15.6, -0.6), function (x, y) { return x + y < 19 ? GULLW[4] : GULLW[2]; }, GULLW[0]),
+    P(GULLG[2], turned(ell(59.4, 14.6, 1.5, 4), 59.4, 14.6, 0.5), function (x, y) { return y < 13 ? GULLG[3] : GULLG[2]; }, GULLG[0])
+  ]);
+
   /* The treats handed out at each house's door: a mince pie, a slice of
      gâche (Guernsey's fruit loaf, buttered), a mug of hot chocolate, a
      candy cane, a gingerbread man, a little Christmas pudding. */

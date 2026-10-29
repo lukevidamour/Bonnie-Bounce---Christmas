@@ -3880,6 +3880,73 @@
       if (e.st === 'dizzy' && !reduce) for (var i = 0; i < 3; i++) { var a = e.t * 0.12 + i * 2.1; BB.draw(ctx, A.starSmall, snap(e.x + 8 + Math.cos(a) * 9 - G.cam.x), snap(e.y - 4 + Math.sin(a) * 3 - G.cam.y)); }
     }
   };
+  /* Grabby Gus on the run, once in each level from 1 to 9 (Luke, 29 Oct:
+     the chase, so he isn't gone from the story till Sark). He swoops in
+     from behind with the golden bell, low over your head, says his piece
+     — CAN'T CATCH ME! — and is away ahead and up off the screen, the bell
+     sparkling. He never hurts anyone: jump and tag him as he goes over
+     and he drops some of his shiny loot (stars) — OI! MY SHINIES!
+     { say: his line }. */
+  var GUSBY_T = 160;
+  KINDS.gusby = {
+    w: 22, h: 14, front: true, fly: true,
+    init: function (e) { e.st = 0; e.y = e.sp.row * T; },
+    update: function (e) {
+      var p = G.p, cam = G.cam, W = BB.W;
+      if (!e.st) { e.st = 1; e.t2 = 0; e.low = p.y - 30; sfx('squawk'); }
+      var u = ++e.t2 / GUSBY_T;
+      if (u >= 1) { e.alive = false; return; }
+      e.x = cam.x - 30 + u * (W + 60);
+      e.y = e.low - 46 * (1 - Math.sin(Math.PI * u)) - 30 * Math.max(0, u - 0.5);
+      if (e.t2 === 70) sfx('jingle');
+      if (!reduce && e.t2 % 6 === 0) fx('sparkle', e.x + e.w / 2 + 12, e.y + 8, { life: 15 });
+      if (!e.tagged && p.st === 'play' && overlap(p, e)) {
+        e.tagged = 50; sfx('squawk'); addStars(3);
+        for (var i = 0; i < 3; i++) fx('coin', e.x + 6 + i * 4, e.y + 8, { vy: -2.6 - i * 0.4, life: 26 });
+      }
+      if (e.tagged > 1) e.tagged--;
+    },
+    draw: function (ctx, e) {
+      var Gs = E.gus;
+      if (!Gs || !e.st) return;
+      var s = Gs.fly[Math.floor(e.t / 7) % 2], x = snap(e.x + e.w / 2 - s.w / 2 - G.cam.x), y = snap(e.y + e.h - s.h + 2 - G.cam.y);
+      BB.draw(ctx, s, x, y, true);
+      if (A.bell) BB.draw(ctx, A.bell, snap(e.x + e.w / 2 + 12 - G.cam.x), snap(e.y + 2 - G.cam.y));
+      // what he says, over him while he's low enough to hear
+      var u = e.t2 / GUSBY_T, line = e.tagged > 1 ? 'OI! MY SHINIES!' : u > 0.12 && u < 0.62 ? e.sp.say : '';
+      if (line) BB.text(ctx, line, Math.max(2, Math.min(BB.W - 2 - BB.textW(line), x + s.w / 2 - BB.textW(line) / 2)), Math.max(28, y - 9), { color: '#ffffff', outline: '#1c1428' });
+    }
+  };
+  /* Grabby Gus's nest (the Cup and Saucer, on the wreck's deck: everyone
+     walks past it), heaped with everything shiny he's pinched (creaturesx.js
+     A.gusnest) — and a ferry ticket. Walk up to it: GRABBY GUS'S NEST!, a
+     shower of his loot, your paper crown back if a gull took it — they
+     bring them all to him — and the clue: HE'S OFF TO SARK! */
+  KINDS.gusnest = {
+    w: 32, h: 17,
+    init: function (e) { e.y = e.sp.row * T - e.h; e.st = 0; },
+    update: function (e) {
+      var p = G.p, cx = e.x + e.w / 2;
+      if (!e.st && p.st === 'play' && Math.abs(p.x + p.w / 2 - cx) < 30 && Math.abs(p.y + p.h - (e.y + e.h)) < 44) {
+        e.st = 1; e.t2 = 0; sfx('jingle'); sfx('power'); addStars(5);
+        sayAt('GRABBY GUS’S NEST!', cx, e.y - 18, '#ffe048');
+        for (var i = 0; i < 5; i++) fx('coin', e.x + 6 + i * 5, e.y + 4, { vy: -3 - (i % 3) * 0.5, life: 28 });
+        if (!p.crown) { p.crown = true; p.crownCol = 0; e.crown = true; }
+      }
+      if (e.st !== 1) return;
+      e.t2++;
+      if (e.t2 === 75) { sayAt('HE’S OFF TO SARK!', cx, e.y - 18, '#ffffff'); sfx('squawk'); }
+      if (e.t2 === 150) { if (e.crown) sayAt('YOUR CROWN BACK!', p.x + p.w / 2, p.y - 12, '#ff94cc'); e.st = 2; }
+    },
+    draw: function (ctx, e) {
+      var N = A.gusnest;
+      if (!N) return;
+      var x = snap(e.x + e.w / 2 - N.w / 2 - G.cam.x), y = snap(e.y + e.h - N.h - G.cam.y);
+      BB.draw(ctx, N, x, y);
+      // the loot twinkles
+      if (!reduce && (e.t >> 3) % 5 === 0) BB.draw(ctx, A.sparkle[(e.t >> 1) % 3], x + 4 + ((e.t >> 3) * 7) % (N.w - 8), y + 2);
+    }
+  };
   /* Father Christmas, standing by his sleigh ({ say: [lines] }): he waves,
      and as Bonnie comes up he says his piece, a line at a time — HO HO…
      OH NO! (the start of Harbour Lights, and of Over the Rooftops). */
@@ -5987,32 +6054,45 @@
     var W = BB.W, tn = titleTheme();
     if (!titleBg) titleBg = BB.backdrop(tn, A.themes[tn]);
     BB.drawBackdrop(ctx, titleBg, reduce ? 0 : tick * 0.4, 0, H);
+    /* a soft night-blue veil over the town (Luke, 29 Oct: its lit windows
+       and lights were a lot to take in), so the name and the children are
+       what you see first — the town still twinkling through behind them */
+    var veil = ctx.createLinearGradient(0, 0, 0, H);
+    veil.addColorStop(0, 'rgba(14,10,40,0.18)'); veil.addColorStop(0.45, 'rgba(14,10,40,0.42)'); veil.addColorStop(1, 'rgba(14,10,40,0.5)');
+    ctx.fillStyle = veil; ctx.fillRect(0, 0, W, H);
     // a strip of ground
     var g = theme(tn);
     var gx = reduce ? 0 : (tick * 0.4) % 16;
     for (var x = 0; x < W + 16; x += 8) { BB.draw(ctx, g.top[(x >> 3) & 1], x - gx, 128); BB.draw(ctx, g.fill[(x >> 3) & 1], x - gx, 136); }
-    /* the cast, strolling past under the title: a sprout, a crab in his
-       Santa hat, a snowman, a robin, a Guernsey cow, a reindeer, Bear and
-       Prince, and the gull who started it all */
-    var SM = E.xsnowman, R6 = E.reindeer, Cw = E.cow;
-    var cast = [E.sprout || E.grumbug, E.xcrab || E.crab, SM ? [SM.idle, SM.idle] : E.snowman, E.robin ? [E.robin.sit, E.robin.sit] : null, Cw ? Cw.walk : null,
-      R6 ? R6.walk : null, E.bear.walk, E.prince ? E.prince.walk : null, E.xgull || E.gull].filter(Boolean), span = W + cast.length * 40;
+    /* a few friends strolling past, well spaced: a reindeer, Bear and
+       Prince, a robin hopping, a snowman */
+    var SM = E.xsnowman, R6 = E.reindeer;
+    var cast = [R6 ? R6.walk : null, E.bear.walk, E.prince ? E.prince.walk : null, E.robin ? [E.robin.sit, E.robin.sit] : null, SM ? [SM.idle, SM.idle] : E.snowman].filter(Boolean), span = W + cast.length * 64;
     cast.forEach(function (list, i) {
-      var f = list[reduce ? 0 : Math.floor(tick / 10) % list.length], hopT = (i === 0 || i === 3) && !reduce ? -Math.abs(Math.sin(tick * 0.09 + i)) * 4 : 0, fly = list === (E.xgull || E.gull) ? -36 : 0;
-      var x = Math.round(((i * 40 - (reduce ? 0 : tick * 0.35)) % span + span) % span - 34);
-      BB.draw(ctx, f, x, Math.round(128 - f.h + hopT + fly));
+      var f = list[reduce ? 0 : Math.floor(tick / 10) % list.length], hopT = list[0] === (E.robin && E.robin.sit) && !reduce ? -Math.abs(Math.sin(tick * 0.09 + i)) * 4 : 0;
+      var x = Math.round(((i * 64 - (reduce ? 0 : tick * 0.3)) % span + span) % span - 34);
+      BB.draw(ctx, f, x, Math.round(128 - f.h + hopT));
     });
     drawLogo(ctx, W / 2, 8);
     // CHRISTMAS, on a red ribbon under the name
     var rib = W > 200 ? 2 : 1, ribR = W / 2 + (BB.textW('CHRISTMAS', rib) + 14 + rib * 2) / 2 + 7;
     UI.ribbon(ctx, W / 2, W > 200 ? 63 : 54, 'CHRISTMAS', '#d8283a', { scale: rib });
-    // whoever's playing, on a trampoline beside the words (clear of the ribbon's tail, on an iPad too)
+    // whoever's playing, big, on a trampoline beside the words (clear of the ribbon's tail, on an iPad too)
     var tx = Math.round(Math.min(W - 20, Math.max(W / 2 + Math.min(76, W / 2 - 24) - 8, ribR + 2))), b = titleBounce, P = hero();
     BB.draw(ctx, A.spring[b.squash ? 1 : 0], tx - 0, 118);
-    var f = b.y < -2 ? P.s.jump : P.s.idle;
-    var by = Math.round(110 - f.h + b.y + (b.squash ? 2 : 0));
+    var f = b.y < -2 ? P.b.jump : P.b.idle;
+    var by = Math.round(120 - f.h + b.y + (b.squash ? 2 : 0));
     BB.draw(ctx, f, tx + 8 - f.w / 2, by, false, outfit().v);
     drawHat(ctx, outfit().hat, tx + 8 - f.w / 2, by, f.w, f.h, f, false);
+    /* and the other children together on the left, cheering each time the
+       trampoline lands (Bonnie, Beau and Winnie: whichever two aren't on
+       it; with a grown-up bouncing, all three) */
+    var kids = ['bonnie', 'beau', 'winnie'].filter(function (k) { return k !== who(); });
+    kids.forEach(function (k, i) {
+      var Q = A.player ? A.player(k) : A.bonnie, cheer = !reduce && (b.squash > 0 || b.y > -6) && (i + Math.floor(tick / 60)) % 2 === 0;
+      var kf = cheer ? Q.b.cheer : (tick + i * 37) % 170 < 6 ? Q.b.blink : Q.b.idle, kx = Math.round((W > 200 ? 26 : 19) + i * (W > 200 ? 26 : 21));
+      BB.draw(ctx, kf, kx - kf.w / 2, 128 - kf.h);
+    });
     if (!titleLight) titleLight = BB.lighting((A.themes[tn] || A.themes.hills).light, 6000, 5);
     BB.catchLight(ctx, f, tx + 8 - f.w / 2, by, false, null, { i: 0.55, col: '#fff0b8', dir: -1 });
     titleLight.render(ctx, { x: reduce ? 0 : tick * 0.4, y: 0 }, reduce);

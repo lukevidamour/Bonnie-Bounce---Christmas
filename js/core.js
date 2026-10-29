@@ -293,8 +293,11 @@
     o = o || {};
     var sc = o.scale || 1;
     str = String(str);
-    // the face is capitals only; '*' is the star and '@' the heart
-    str = str.replace(/[a-wyz]/g, function (c) { return c.toUpperCase(); });
+    // the face is capitals only; '*' is the star and '@' the heart. It has
+    // no curly apostrophe or accents, so IT’S and GÂCHE are drawn with
+    // the plain ones (one letter for one, so widths are unchanged)
+    str = str.replace(/[a-wyz]/g, function (c) { return c.toUpperCase(); })
+      .replace(/[\u2018\u2019]/g, "'").replace(/[\u00c0-\u00c5]/g, 'A').replace(/[\u00c8-\u00cb]/g, 'E').replace(/[\u00d2-\u00d6]/g, 'O');
     var w = BB.textW(str, sc);
     if (o.align === 'center') x -= Math.floor(w / 2);
     else if (o.align === 'right') x -= w;

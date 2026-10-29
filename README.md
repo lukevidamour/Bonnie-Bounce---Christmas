@@ -124,11 +124,21 @@ it is whatever was lost there, up to something silly.
 | 4 | The Green Lanes | hedge-veg stalls with honesty boxes, Guernsey cows to ride (hop along the cows' choir and they moo Jingle Bells), puddles, the blue postbox's whoosh of letters up into the sky | Vixen, among the cows, going MOO |
 | 5 | Saumarez Park | everyone on bikes: trees and the lake bridge strung with lights that come on as you ride, the playground, the hedge maze | Father Christmas's hat, on a duck |
 | 6 | Sunset Bays | Cobo and Vazon at sunset: a sledge down the dunes, crabs in Santa hats, seals to bounce on, the tide going out to show a path through the rock pools | Cupid, buried to his antlers in a sandcastle |
-| 7 | The Cup and Saucer | Fort Grey at dusk: a shipwreck to climb, rigging to swing on, treasure rooms, the fort to climb | Donner, stuck on the cottage roof |
+| 7 | The Cup and Saucer | Fort Grey at dusk: a shipwreck to climb, and on its deck **Grabby Gus's nest**, heaped with everything shiny he's pinched (your paper crown back, if a gull took it) and the clue that he's off to Sark; rigging to swing on, treasure rooms, the fort to climb | Donner, stuck on the cottage roof |
 | 8 | Town Lights | St Peter Port's steep streets as it gets dark: lamps coming on as you pass, knock-knock doors, fairy-light bridges, chimney smoke, and the big red button that switches on the whole Town | Comet, tangled in fairy lights |
 | 9 | Shell Beach | the ferry to Herm, the dunes, the quarry, Shell Beach by moonlight, seals | Blitzen, in a deckchair, in sunglasses |
 | 10 | Sark by Starlight | the boat, the horse and cart, shooting stars, the silver mine, La Coupée, and **Grabby Gus**: he dives and crash-lands, so stomp him while he's dizzy. Three stomps and he's sorry, and the golden bell is back | (the bell) |
 | 11 | Over the Rooftops | Christmas Eve at midnight: fly Father Christmas's sleigh, dropping a present down every chimney, then across the roofs on foot, and the sleigh again home | home |
+
+**The chase.** Grabby Gus is never far away. Once in every level from 1
+to 9 he swoops in from behind with the golden bell, low over your head,
+shouting something cheeky ("CAN'T CATCH ME!", "MOO TO YOU!", "NO BIKES IN
+THE SKY!"), and is off ahead and away. He never hurts anyone: jump and
+tag him as he goes over and he drops some of his shiny loot (OI! MY
+SHINIES!). In level 7 he warns you to keep out of his nest, and it's right
+there on the wreck's deck. In level 9 it's "SEE YOU ON SARK!". On the map
+he circles the island with the bell, and once his nest is found he's off
+east, towards Sark.
 
 After level 11 comes **Christmas morning**: the whole family round the
 tree, Bear and Prince in jumpers, Gus in a paper crown with a bag of
@@ -364,6 +374,15 @@ What it found, and what changed:
 - **Starting as yourself:** a new game asks WHO'S PLAYING? before the
   story (above). The story now ignores taps for its first moment, so an
   excited second tap on yourself doesn't skip it.
+- **The title:** Bonnie, Beau and Winnie are all on it, big: whoever's
+  playing bounces on the trampoline, the other two cheer on the left each
+  time they land. A soft night-blue veil over the town lets the name and
+  the children stand out, and the parade along the bottom is a few
+  friendly faces (a reindeer, Bear, Prince, the robin, a snowman).
+- **Apostrophes:** the game's pixel font has no curly apostrophe or
+  accents, so IT'S SNOWING!, THE TIDE'S GOING OUT!, SORRY! HERE'S YOUR
+  BELL!, FATHER CHRISTMAS'S HAT!, A SLICE OF GÂCHE! and one joke showed a
+  "?" in them. The text drawing now uses the plain letters.
 
 The responsive audit (`tools/qa/audit.py`, 23 sizes from 280×653 to
 1920×1080) passes with nothing to fix. Its "loaded" check used to need

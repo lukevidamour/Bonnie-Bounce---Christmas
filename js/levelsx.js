@@ -68,6 +68,8 @@
     name: 'HARBOUR LIGHTS', theme: 'stpeterport', alt: 'harbour', w: 440, seed: 1101, snow: 0,
     found: { who: 'dasher', gag: 'dizzy' },
     build: function (L) {
+      // Grabby Gus, swooping by with the bell (game.js KINDS.gusby)
+      L.e('gusby', 200, 3, { say: "CAN'T CATCH ME!" });
       L.ground(0, 62);
       L.e('santa', 8, 16, { crashed: true, say: ['HO HO HO...', 'OH NO!', 'MY REINDEER RAN OFF!', 'PLEASE FIND THEM!'] });
       L.tip(19, 'jump');
@@ -149,6 +151,8 @@
     ice: [[52, 70], [262, 294]],
     found: { who: 'prancer', gag: 'skate' },
     build: function (L) {
+      // Grabby Gus, swooping by with the bell (game.js KINDS.gusby)
+      L.e('gusby', 180, 3, { say: 'BRRR! STILL MINE!' });
       L.ground(0, 150);
       L.row(10, R1, '?P?');
       L.e('robin', 16); L.e('sprout', 24); L.e('robin', 30);
@@ -215,6 +219,8 @@
     name: 'THE NOON-DAY GUN', theme: 'cornet', alt: 'castle', w: 450, seed: 1303,
     found: { who: 'dancer', gag: 'dance' },
     build: function (L) {
+      // Grabby Gus, swooping by with the bell (game.js KINDS.gusby)
+      L.e('gusby', 160, 3, { say: 'TOO SLOW! HEE HEE!' });
       L.ground(0, 44);
       L.row(10, R1, '?P?');
       L.e('xcrab', 20); L.e('xgull', 28, 8);
@@ -287,6 +293,8 @@
     name: 'THE GREEN LANES', theme: 'lanes', alt: 'hills', w: 460, seed: 1404,
     found: { who: 'vixen', gag: 'moo' },
     build: function (L) {
+      // Grabby Gus, swooping by with the bell (game.js KINDS.gusby)
+      L.e('gusby', 150, 3, { say: 'MOO TO YOU!' });
       L.ground(0, 84);
       L.row(10, R1, '?P?');
       L.e('sprout', 18); L.e('robin', 24);
@@ -359,6 +367,8 @@
     name: 'SAUMAREZ PARK', theme: 'saumarez', alt: 'park', w: 440, seed: 1505, bike: true,
     found: { who: 'hat', gag: 'hat' },
     build: function (L) {
+      // Grabby Gus, swooping by with the bell (game.js KINDS.gusby)
+      L.e('gusby', 150, 3, { say: 'NO BIKES IN THE SKY!' });
       var d = 13;
       L.start = { x: 3, row: d };
       L.ground(0, 120, d);
@@ -419,6 +429,8 @@
     name: 'SUNSET BAYS', theme: 'bays', alt: 'beach', w: 450, seed: 1606,
     found: { who: 'cupid', gag: 'sandcastle' },
     build: function (L) {
+      // Grabby Gus, swooping by with the bell (game.js KINDS.gusby)
+      L.e('gusby', 200, 3, { say: 'SHINY SUNSET! MINE!' });
       L.ground(0, 44);
       L.row(10, R1, '?P?');
       L.e('xcrab', 20); L.e('xgull', 30, 8);
@@ -485,6 +497,8 @@
     name: 'THE CUP AND SAUCER', theme: 'fortgrey', alt: 'harbour', w: 460, seed: 1707,
     found: { who: 'donner', gag: 'roof' },
     build: function (L) {
+      // Grabby Gus, swooping by with the bell (game.js KINDS.gusby)
+      L.e('gusby', 60, 3, { say: 'KEEP OUT OF MY NEST!' });
       L.ground(0, 48);
       L.row(10, R1, '?P?');
       L.e('xcrab', 18); L.e('sprout', 26);
@@ -498,6 +512,8 @@
       L.stairs(80, 3);
       L.box(83, 13, 104, 16, TL.HARD);
       L.semi(88, 100, 9); L.coins(89, 8, 10);
+      // and on the deck, Grabby Gus's nest — and the clue: he's off to Sark
+      L.e('gusnest', 95, 13);
       // the rigging: swing across the water (swim if you fall in)
       L.ground(106, 118, 17); L.water(106, 15, 118, 17);
       L.plat(110, 2, 3, { swing: 8, speed: 0.025 });
@@ -558,6 +574,8 @@
     name: 'TOWN LIGHTS', theme: 'townlights', alt: 'night', w: 460, seed: 1808,
     found: { who: 'comet', gag: 'lights' },
     build: function (L) {
+      // Grabby Gus, swooping by with the bell (game.js KINDS.gusby)
+      L.e('gusby', 230, 3, { say: 'OOH! LIGHTS! SHINY!' });
       L.ground(0, 50);
       lamp(L, 8);
       L.row(14, R1, '?P?');
@@ -629,6 +647,8 @@
     name: 'SHELL BEACH', theme: 'herm', alt: 'beach', w: 450, seed: 1909,
     found: { who: 'blitzen', gag: 'deckchair' },
     build: function (L) {
+      // Grabby Gus, swooping by with the bell (game.js KINDS.gusby)
+      L.e('gusby', 300, 3, { say: 'SEE YOU ON SARK!' });
       L.ground(0, 30);
       L.row(12, R1, '?P?');
       L.e('xcrab', 18);

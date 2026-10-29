@@ -1478,8 +1478,10 @@
       }
 
       // ---- in the sky: Grabby Gus, circling with the bell; the gulls; the clouds; the snow
+      // (once his nest's been found at Fort Grey, he's off east, towards Sark: over it when it's in view)
       if (!hasDone(st, 10)) {
-        var gcx = Math.max(150, Math.min(560, cx + W * 0.55 + Math.sin(t * 0.0021) * W * 0.22)), gcy = 76 + Math.sin(t * 0.0037) * 6, ga = rd ? 1 : t * 0.017;
+        var east = hasDone(st, 7), gcx = east ? Math.min(SARK.x, cx + W * 0.8) : Math.max(150, Math.min(560, cx + W * 0.55 + Math.sin(t * 0.0021) * W * 0.22));
+        var gcy = (east ? 62 : 76) + Math.sin(t * 0.0037) * 6, ga = rd ? 1 : t * 0.017;
         var gxx = gcx + Math.cos(ga) * 30, gyy = gcy + Math.sin(ga) * 11 - 6, gd = -Math.sin(ga) > 0 ? 1 : -1;
         ctx.globalAlpha = 0.14; oval(ctx, gxx + 3, gyy + 24, 4, 1.2, '#1c1030'); ctx.globalAlpha = 1;
         gus(ctx, gxx, gyy, gd, t, { fly: true, bell: true, glide: Math.floor(t / 120) % 3 === 2 }, night ? 0.6 : 1);
