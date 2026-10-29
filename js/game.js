@@ -3515,7 +3515,7 @@
       var p = G.p;
       if (e.done || p.st !== 'play' || !overlap(p, e)) return;
       e.done = true; sfx('clink'); sayAt('CLINK!', e.x + 16, e.y - 8, '#ffe8a0');
-      setTimeout0(e, 20, function () { sayAt('THANK YOU!', e.x + e.w / 2, e.y - 18, '#ffffff'); giveTreats({ x: e.x, y: e.y + 4, w: e.w, sp: { give: e.sp.give || 'stars' } }); });
+      setTimeout0(e, 40, function () { sayAt('THANK YOU!', e.x + e.w / 2, e.y - 30, '#ffffff'); giveTreats({ x: e.x, y: e.y + 4, w: e.w, sp: { give: e.sp.give || 'stars' } }); });
     },
     draw: function (ctx, e) {
       var S6 = A.vegstall;
