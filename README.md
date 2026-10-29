@@ -354,8 +354,11 @@ the test:
 
 Last full run, 29 Oct:
 
-- **Finish:** all 11 levels, with one heart and never hit. Every flag
-  restarts cleanly. Gus is beaten by the robot itself.
+- **Finish:** all 11 levels, with one heart and never hit, and the bonus,
+  Christmas Day. Every flag restarts cleanly. Gus is beaten by the robot
+  itself. The robots play with one heart whoever's playing, with no snow
+  clouds and no turn-taking (`BB.robot`), so this proves every level can
+  be done without the help.
 - **Medals:** all 33 reachable. Three were out of reach and fixed: the
   postbox's sky route in level 4, the chimney-smoke ledge in level 8, and
   the seal in level 6, whose bob was broken so he couldn't be bounced on.
