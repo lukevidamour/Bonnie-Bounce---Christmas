@@ -321,8 +321,9 @@
       /* The blue postbox: post a letter and the letters pour out of it,
          up and up, carrying you into the sky — a path of stars along the
          clouds' edge, a medal at its end, and a drop back down. */
-      L.e('postbox', 262, 16, { h: 11 });
-      L.semi(266, 290, 4); L.coins(267, 3, 18); L.medal(287, 2);
+      L.e('postbox', 262, 16, { h: 12 });
+      // (the cloud's edge starts right beside the letters, so you step off them onto it)
+      L.semi(264, 290, 5); L.coins(266, 4, 18); L.medal(287, 3);
       L.check(296);
       // the old glasshouses: climb over them; Prince on top
       L.stairs(302, 3);
@@ -458,7 +459,8 @@
       // a seal to bounce up to the high rock (a medal there)
       L.ground(312, 326, 17); L.water(312, 14, 326, 17);
       L.e('seal', 318, 14);
-      L.semi(320, 328, 6); L.medal(324, 4);
+      // (the rock's ledge is right over the seal: bounce straight up through it)
+      L.semi(315, 325, 6); L.medal(321, 4);
       L.ground(326, 450);
       // the lifeguard's hut: Prince on its roof
       L.box(338, 12, 344, 16, TL.HARD); L.semi(339, 343, 8); prince(L, 341, 8);
@@ -597,8 +599,8 @@
       lamp(L, 300);
       L.e('xgull', 304, 8);
       // smoke from a chimney: ride it up to the rooftop (a medal)
-      L.steam(312, 9);
-      L.semi(314, 324, 5); L.medal(320, 3); L.coins(315, 4, 6);
+      L.steam(312, 11);
+      L.semi(313, 324, 6); L.medal(320, 4); L.coins(315, 5, 6);
       // a window box: Prince
       L.row(330, 12, 'XXX'); prince(L, 331, 12);
       // knock here: they've found a medal for you

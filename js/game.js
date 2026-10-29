@@ -3393,10 +3393,11 @@
   // a seal in the sea: land on his head and he bounces you up high (a spring in the water), bobbing all the while
   KINDS.seal = {
     w: 12, h: 6, top: true, topOff: 0,
-    init: function (e) { e.y0 = e.sp.row * T - 4; e.y = e.y0; e.x += 1; },
+    init: function (e) { e.y0 = e.sp.row * T - 4; e.y = e.y0; e.x += 1; e.ph = (e.x % 37) * 0.17; },
     update: function (e) {
       if (e.squash) e.squash--;
-      e.y = e.y0 + (reduce ? 0 : Math.sin(G.tick * 0.05 + e.x0) * 1.2);
+      // (bobbing by whole pixels, so landing on his head always counts)
+      e.y = e.y0 + (reduce ? 0 : Math.round(Math.sin(G.tick * 0.05 + e.ph) * 1.2));
       var p = G.p;
       if (p.on === e) {
         e.squash = 10; p.vy = -SPRING * 1.05; p.holdT = 22; p.on = null; p.ground = false;
@@ -3533,11 +3534,11 @@
     w: 10, h: 17,
     init: function (e) { e.y = e.sp.row * T - e.h; e.rows = e.sp.h || 10; e.on = 0; },
     update: function (e) {
-      var p = G.p, colX = e.x - 1, top = e.y - e.rows * T;
+      var p = G.p, colX = e.x - 3, top = e.y - e.rows * T;
       if (!e.on && p.st === 'play' && overlap(p, { x: e.x - 4, y: e.y - 6, w: e.w + 8, h: e.h + 6 })) { e.on = 1; sfx('whoosh'); sayAt('DEAR FATHER CHRISTMAS...', e.x + e.w / 2, e.y - 30, '#ffffff'); }
       if (!e.on) return;
       e.on++;
-      if (p.st === 'play' && p.x + p.w > colX && p.x < colX + 12 && p.y + p.h > top && p.y < e.y + 4) { p.vy = Math.max(-2.4, p.vy - 0.95); p.ground = false; p.on = null; if (G.tick % 18 === 0) sfx('swim'); }
+      if (p.st === 'play' && p.x + p.w > colX && p.x < colX + 16 && p.y + p.h > top && p.y < e.y + 4) { p.vy = Math.max(-2.4, p.vy - 0.95); p.ground = false; p.on = null; if (G.tick % 18 === 0) sfx('swim'); }
     },
     draw: function (ctx, e) {
       var Pb = A.postbox;
