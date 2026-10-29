@@ -214,3 +214,51 @@ Match or beat the original's Half Term! land (levels 46–55 in the original:
 - Luke: "Make it crazy fun, so the boys are smiling and laughing as they
   play. Attention to detail in everything, even the map. I want the boys
   to LOVE it." Then QA it thoroughly.
+
+## The approved plan (29 Oct)
+
+**Story.** Christmas Eve in Guernsey, from morning to midnight. Father
+Christmas is on his last practice flight over St Peter Port when **Grabby
+Gus**, the greediest gull in Guernsey, spots the sleigh's shiny golden bell.
+He swoops, the reindeer take fright, and the sleigh crash-lands in the
+harbour. The eight reindeer scatter across the island and Gus flies off with
+the bell. "Ho ho… oh no!" Each level ends at a cosy house where a family
+member opens the door with a treat, and in levels 1–9 something lost waits
+there doing something silly. Gus is silly, never mean: beaten, he says sorry,
+gets a bag of chips for Christmas and joins the ending in a cracker crown.
+Reindeer names come from the 1823 poem (public domain). Never Rudolph, and
+no red nose.
+
+| # | Level | Place, time | Wonder moment | Found at the end |
+|---|---|---|---|---|
+| 1 | Harbour Lights | St Peter Port harbour and market, morning | the first cracker: BANG, a paper crown (a gull tries to pinch it) | Dasher, dizzy round a lamp post, wrapped in tinsel |
+| 2 | Frosty Morning | Candie Gardens | a giant snow globe starts the game's first snow; skating; sledging; the warm Victorian glasshouses | Prancer, skating in wobbly circles |
+| 3 | The Noon-Day Gun | Castle Cornet | at noon the gun goes BOOM and fires you over the walls in tinsel | Dancer, dancing on the battlements |
+| 4 | The Green Lanes | hedge-veg stalls, Guernsey cows | honesty boxes; cow rides; cows moo Jingle Bells; a blue postbox's whoosh of letters carries you up | Vixen, among the cows going "MOO" |
+| 5 | Saumarez Park | on bikes, like the original's Bike Ride; the family rides alongside | the lake, the Japanese garden's bridges, the big playground | Father Christmas's hat, on a duck |
+| 6 | Sunset Bays | Cobo and Vazon, the red rocks at sunset | the big low tide reveals a hidden path; sledge down the dunes | Cupid, buried to his antlers in a sandcastle |
+| 7 | The Cup and Saucer | Fort Grey and Rocquaine at dusk | the lighthouse beam; shipwreck-treasure secret rooms | Donner, stuck on top of Fort Grey |
+| 8 | Town Lights | St Peter Port's steep streets and steps as it gets dark | the Town's lights come on as you run; fairy-light bridges; the whole Town lights up | Comet, tangled in fairy lights |
+| 9 | Shell Beach | the evening boat to Herm (ride there and back) | moonlit Shell Beach, sparkling shells; seals | Blitzen in a deckchair, in sunglasses |
+| 10 | Sark by Starlight | no cars, the brightest stars; horse and cart, bikes, La Coupée | shooting stars; Grabby Gus at the top of the cliffs: stomp him when he's dizzy and win back the bell | the golden bell |
+| 11 | Over the Rooftops | Christmas Eve night | fly Father Christmas's sleigh, drop presents down chimneys, windows glow; the last chimney is home | — |
+
+**Ending:** Christmas morning, everyone round the tree: the cousins, the
+aunties and uncles, Bear and Prince in jumpers, Gus in his crown, Father
+Christmas waving from the sky. After the credits, the **Boxing Day dip**:
+everyone runs into the sea, shrieks and runs straight back out; Bear and
+Prince watch from a towel, appalled.
+
+**Everywhere:** Bear *and* Prince hidden in every level (both join the
+ending); sprouts that hop and go *pfft* when stomped; snowmen who sneeze
+their carrots off; Christmas puddings to bounce on; Gus's gulls who try to
+pinch your crown; advent-calendar doors hidden in walls, each opening a door
+of an advent calendar in the sticker book; Christmas outfits to win (elf,
+reindeer onesie, snowman, gingerbread, Father Christmas suit). A living map
+of Guernsey with Herm and Sark: the sky goes from morning to starry night,
+snow after level 2, the Town lights after level 8, the sleigh in the harbour
+fills with reindeer, Gus circling; at the end a snowy Christmas morning.
+Music: original, plus public-domain secular carols.
+
+Still to ask Luke: whose house Christmas morning is at, and which beach the
+Boxing Day dip is.
