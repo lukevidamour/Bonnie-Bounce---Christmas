@@ -862,8 +862,10 @@
      Ross." The round mop and the stubble were that.) */
   /* His hair, shared with his cameo in family.js (A.lukeHair): the volume
      on top, tumbling forward over his forehead in a loose fringe, and the
-     back and sides short and close to his head — so it stands taller than
-     it's wide, never wider than his head. Placed on the player's head; ox,
+     sides a little fuller — a curly bowl, curls down over the top of his
+     ear and at his temple (Luke, 29 Oct: "a tiny bit more of a curly
+     bowlcut these days — not much"), the back close behind them. It stands
+     taller than it's wide, and only just wider than his head. Placed on the player's head; ox,
      oy move it onto another (the cameo's is 2.5 right and 4 lower).
      back: the short back and sides, drawn behind his ear; top: the curls,
      drawn over his face; at(x, y): whether a point is under the curls. */
@@ -871,11 +873,14 @@
     var T = function (c) { return [c[0] + ox, c[1] + oy, c[2]]; };
     // tight curls, packed in rows: piled high over the crown (its outline
     // bumpy where they meet the sky), then a fringe of them hanging forward
-    // over his forehead; none down the sides, which are cut short
+    // over his forehead, and a few down each side: over the top of his ear,
+    // and one or two at his temple
     var list = [
       [16.6, 3.4, 1.9], [19.8, 1.9, 1.9], [23.2, 1.6, 1.9], [26.6, 2.1, 1.9], [29.4, 3.9, 1.8],
       [14.8, 6.4, 1.8], [17.9, 5.2, 1.8], [21.3, 4.8, 1.8], [24.7, 4.9, 1.8], [28, 5.7, 1.8], [30.2, 6.8, 1.4],
-      [19.6, 8.2, 1.6], [22.9, 8.9, 1.7], [26.1, 8.5, 1.6], [28.9, 8.4, 1.4]
+      [19.6, 8.2, 1.6], [22.9, 8.9, 1.7], [26.1, 8.5, 1.6], [28.9, 8.4, 1.4],
+      [13, 8.6, 1.8], [12.8, 11.4, 1.7], [15.8, 9.3, 1.6], [14.6, 12.4, 1.4],
+      [30.8, 9.5, 1.4], [31.3, 11.5, 1.1]
     ].map(T);
     var fill = ell(22.4 + ox, 5.2 + oy, 7.6, 3.6);
     var top = { c: '3', line: '1',
@@ -949,13 +954,14 @@
         paint(rows, 25, 17, ['t']);
         // the moustache: a full ginger one over his top lip, bushy along
         // its top, its corners turning down just past the corners of his
-        // mouth (no lower — under the mouth is clean); then the smile
+        // mouth (no lower — under the mouth is clean); then the smile, a
+        // happy one with his teeth showing, so it reads under the moustache
         paint(rows, 21, 18, ['.455443.', '34444443']);
         var mouth = {
           wheee: [23, 20, ['qmmq', '.qq.']],
           hurt: [24, 20, ['qmq', '.q.']],
           gasp: [24, 20, ['qmq', '.q.']]
-        }[kind] || [22, 20, ['q....q', '.qqqq.']];
+        }[kind] || [22, 20, ['qwwwwq', '.qqqq.']];
         paint(rows, mouth[0], mouth[1], mouth[2]);
       }
     };
@@ -1044,13 +1050,17 @@
     } };
     return { behind: behind, crown: crown, near: near, far: far, at: function (x, y) { return crown.f(x, y) || near.f(x, y) || far.f(x, y); } };
   };
-  // a big gap-toothed grin (Beau and Winnie, both with a front tooth out)
-  var GAP = ['.qqqqq.', 'qwwqwwq', '.qmmmq.'];
+  /* Beau and Winnie's big happy smile, corners right up, open a little —
+     no teeth (Luke, 29 Oct: the gap-toothed grin they first had read as
+     gritted teeth; everyone should see themselves drawn kindly) — and
+     their laugh of delight in mid-air. */
+  var GRIN = ['q.....q', '.qmmmq.', '..qqq..'];
+  var LAUGH = ['qqqqq', 'qmnmq', '.qqq.'];
 
   /* ---- Beau -----------------------------------------------------------------
      Eight: long, wavy, golden-blond hair parted near the middle, falling
      past his shoulders, lighter at the ends; blue eyes, rosy cheeks and a big
-     gap-toothed grin. His royal-blue tracksuit, zipped to the chin, with a
+     happy smile. His royal-blue tracksuit, zipped to the chin, with a
      white stripe down each arm and leg; white trainers. (No badge.) */
   var BEAU = (function () {
     var H = flowing({ px: 22.8, near: [11.2, 17.6], far: [30.4, 36], len: 31.5, back: 31, wave: 1, ends: true });
@@ -1075,7 +1085,7 @@
           paint(rows, 21, 13, eye); paint(rows, 27, 13, eye);
         }
         paint(rows, 20, 11, ['22']); paint(rows, 27, 11, ['22']);
-        var mouth = { wheee: [22, 18, ['qqqqq', 'qwqwq', 'qmmmq', '.qqq.']], hurt: [24, 19, ['.q.', 'qmq', '.q.']], gasp: [24, 19, ['.q.', 'qmq', '.q.']] }[kind] || [20, 18, GAP];
+        var mouth = { wheee: [22, 18, LAUGH], hurt: [24, 19, ['.q.', 'qmq', '.q.']], gasp: [24, 19, ['.q.', 'qmq', '.q.']] }[kind] || [20, 18, GRIN];
         paint(rows, mouth[0], mouth[1], mouth[2]);
       }
     };
@@ -1085,7 +1095,7 @@
      Five: light-blond hair parted in the middle — no fringe — falling
      past his cheeks to his shoulders and flicking out at the ends (Luke's
      video, 29 Oct: the first try, a bob with a fringe, didn't look like
-     him); very rosy cheeks, blue eyes, a big gap-toothed grin; his black
+     him); very rosy cheeks, blue eyes, a big happy smile; his black
      leather bomber jacket, its collar, cuffs and waistband striped red and
      white, over a white tee; dark trousers; black trainers. His cheer is
      the double thumbs up from his photo. */
@@ -1119,7 +1129,7 @@
           var eye = kind === 'blink' ? SHUT : EYE;
           paint(rows, 21, 13, eye); paint(rows, 27, 13, eye);
         }
-        var mouth = { wheee: [22, 18, ['qqqqq', 'qwqwq', 'qmmmq', '.qqq.']], hurt: [24, 19, ['.q.', 'qmq', '.q.']], gasp: [24, 19, ['.q.', 'qmq', '.q.']] }[kind] || [20, 18, GAP];
+        var mouth = { wheee: [22, 18, LAUGH], hurt: [24, 19, ['.q.', 'qmq', '.q.']], gasp: [24, 19, ['.q.', 'qmq', '.q.']] }[kind] || [20, 18, GRIN];
         paint(rows, mouth[0], mouth[1], mouth[2]);
       }
     };

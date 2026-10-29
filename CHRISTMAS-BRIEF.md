@@ -195,10 +195,10 @@ Match or beat the original's Half Term! land (levels 46–55 in the original:
 ## Luke's answers (29 Oct)
 
 - **Beau**, 8, he/him: long wavy dark-blond hair past his shoulders,
-  lighter at the ends, blue eyes, rosy cheeks, a gap-toothed grin; a royal
+  lighter at the ends, blue eyes, rosy cheeks, a big happy smile (drawn without the gap tooth: Luke, 29 Oct); a royal
   blue zip tracksuit with white stripes down the arms and legs.
 - **Winnie**, 5, he/him: a blond bob, blue eyes, very rosy cheeks, a
-  gap-toothed grin, double thumbs up; a black bomber jacket with red and
+  a big happy smile, double thumbs up; a black bomber jacket with red and
   white striped cuffs and collar.
 - **Uncle Ollie**, he/him: shoulder-length wavy blond hair, a full blond
   beard, blue eyes, a big smile; a pale grey suit and a white shirt.
