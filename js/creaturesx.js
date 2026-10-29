@@ -712,6 +712,15 @@
   };
   D.xtree = [bigTree(0), bigTree(1)];
 
+  // a present caught on the finishing arch: it swoops down to you as you run through (game.js, the goal)
+  A.xgift = [0, 1].map(function (k) {
+    return build(16, 16, [
+      P(SUIT[2], rrect(1, 5, 15, 15, 1.4), orb(5, 6, 14, 10, SUIT), SUIT[0]),
+      P(GOLD[3], or(rrect(7, 5, 9, 15, 0.3), rrect(1, 8.6, 15, 10.4, 0.3)), null, GOLD[1]),
+      P(GOLD[2], or(ell(5.4 - k * 0.4, 3.2, 3, 2), ell(10.6 + k * 0.4, 3.2, 3, 2)), orb(7, 2, 6, 3, GOLD), GOLD[0])
+    ]);
+  });
+
   // for the sprite sheet: tools/sheet.html?only=xmas
   (A.sheet = A.sheet || []).push(['xmas things', [
     ['sleigh', A.sleigh], ['cracker', A.cracker[0]], ['', A.cracker[1]], ['globe', A.snowglobe[0]], ['', A.snowglobe[1]],

@@ -4,12 +4,12 @@
    Every box, banner and pointer on every screen comes from here, so the
    whole game speaks with one hand. It's storybook paper and felt, not
    app chrome: cream paper with a plum ink edge and a running stitch,
-   like a patch sewn on a school bag (or on Monsty); ribbon banners with
-   folded tails for names; Monsty's own head as the pointer in menus.
+   like a patch sewn on a school bag; ribbon banners with folded tails for
+   names; a little Christmas pudding as the pointer in menus.
 
      BB.ui.paper(ctx, x, y, w, h)          a card of paper
      BB.ui.ribbon(ctx, cx, y, text, col)   a banner; returns its width
-     BB.ui.cursor(ctx, x, y, t)            Monsty, bobbing, pointing right
+     BB.ui.cursor(ctx, x, y, t)            a Christmas pudding, bobbing
      BB.ui.dim(ctx)                        the world dimmed behind a menu
      BB.ui.INK / SOFT / PICK               the inks for writing on paper
    ========================================================================== */
@@ -84,18 +84,18 @@
     return bw;
   };
 
-  // Monsty's head: purple, two big eyes, orange spikes on top
+  // the pointer in menus: a little Christmas pudding, white sauce poured over it, a sprig of holly on top
   var head = BB.spr([
-    '..o.o.o..',
-    '.#O#O#O#.',
-    '#qqqqqqq#',
-    '#qWWqWWq#',
-    '#qW#qW#q#',
-    '#qqqqqqq#',
-    '#qq###qq#',
-    '.#qqqqq#.',
+    '...hxh...',
+    '..#####..',
+    '.#WWWWW#.',
+    '#WWWdWWW#',
+    '#dWddWdd#',
+    '#ddDdddd#',
+    '#dddddDd#',
+    '.#ddDdd#.',
     '..#####..'
-  ], { q: '#8a44dc', W: '#ffffff', o: '#ffc060', O: '#f6a13a' });
+  ], { h: '#2e8a3c', x: '#e83a4a', W: '#ffffff', d: '#7a4224', D: '#2a140c' });
   var cursor = function (g, x, y, t) {
     var bob = BB.reduce ? 0 : Math.round(Math.sin((t || 0) * 0.2) * 1.5 * 2) / 2;
     BB.draw(g, head, x + bob, y);

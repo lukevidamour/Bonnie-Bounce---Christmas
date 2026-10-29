@@ -832,15 +832,14 @@
         ctx.fillStyle = '#ffffff'; ctx.fillRect(snap(bx - 1.5), snap(by - 1.8), 1, 1);
         ctx.fillStyle = DK; ctx.fillRect(snap(bx - 0.5), snap(by + 3), 1, 0.5);
       });
-      /* One Day…: one of Bonnie's wishes, caught on the arch — a golden
-         paper star. Half Term!: a wrapped sweet for his pumpkin bucket.
-         Through the arch, and it swoops down to him. */
-      var prize = G.n > 45 ? A.treat : G.n > 35 ? A.wish : null;
+      /* A present, caught on the arch (the sleigh dropped it, over the
+         island): through the arch, and it swoops down to you. */
+      var prize = A.xgift || null;
       if (prize) {
         var wf = prize[reduce ? 0 : Math.floor(G.tick / 8) % prize.length], wk = e.relT < 0 ? 0 : Math.min(1, e.relT / 30);
         var wx = x + (G.p.x + G.p.w / 2 - G.cam.x - x) * wk, wy = y - 52 + (G.p.y - G.cam.y - 6 - (y - 52)) * wk;
         if (e.relT < 34) {
-          if (!reduce) { ctx.globalAlpha = 0.3 + Math.sin(G.tick * 0.1) * 0.12; BB.icons.disc(ctx, wx, wy + 4, 9, G.n > 45 ? '#ffc890' : '#ffe890'); ctx.globalAlpha = 1; }
+          if (!reduce) { ctx.globalAlpha = 0.3 + Math.sin(G.tick * 0.1) * 0.12; BB.icons.disc(ctx, wx, wy + 4, 9, '#ffe890'); ctx.globalAlpha = 1; }
           BB.draw(ctx, wf, snap(wx - wf.w / 2), snap(wy + 4 - wf.h / 2));
         }
         if (e.relT === 33) { sfx('medal'); for (var w2 = 0; w2 < 10; w2++) fx('spark', G.p.x + G.p.w / 2, G.p.y, { vx: Math.cos(w2 * 0.63) * 1.4, vy: Math.sin(w2 * 0.63) * 1.4, life: 30, col: w2 % 2 ? '#ffe048' : '#ffffff' }); }
@@ -5063,6 +5062,7 @@
     fountain6: [0.65, 40, '#9aff70', 0.3], lamppost: [0.88, 40, '#ffe08a', 0.36], inflatable: [0.5, 26, '#e8f0ff', 0.2],
     ghostband: [0.5, 40, '#c8f0ff', 0.26, 0.5], organ: [0.5, 50, '#ffd890', 0.2], pumpkinband: [0.5, 36, '#ffa040', 0.3],
     // Christmas (backdropx2.js): the Town's lamps, a shop's tree, Sark's lanterns, a lit dormer window
+    x1lamppost: [0.88, 40, '#ffe08a', 0.36], x1fairytree: [0.6, 30, '#fff0c0', 0.28], x1stonelantern: [0.55, 22, '#ffd070', 0.3],
     x2lamp: [0.86, 40, '#ffe08a', 0.36], x2shoptree: [0.55, 28, '#ffd890', 0.26], x2lantern: [0.6, 34, '#ffc870', 0.36], x2dormer: [0.45, 30, '#ffc870', 0.3]
   };
   var gatherLights = function () {
@@ -6223,21 +6223,17 @@
     // laid out to fit the narrowest screen: the names on the left, three buttons on the right
     var W = BB.W, x0 = W - 80, out = [];
     VOICES.forEach(function (v, r) { [['REC', 24], ['PLAY', 30], ['X', 12]].forEach(function (b, c) { var x = x0 + [0, 27, 60][c]; out.push({ r: r, c: c, x: x, y: 34 + r * 20, w: b[1], h: 14, t: b[0] }); }); });
-    // and under the voices, a button to open the next land
-    var land = landOf(Math.max(1, save.unlocked)), t = land < LAND_LAST.length ? 'OPEN LEVEL ' + (LAND_LAST[land - 1] + 1) : 'ALL LANDS OPEN';
+    // and under the voices, a button to open the next level
+    var t = save.unlocked < BB.LEVELS.length ? 'OPEN LEVEL ' + (save.unlocked + 1) : 'ALL LEVELS OPEN';
     out.push({ r: 3, c: 0, x: W / 2 - 50, y: 98, w: 100, h: 14, t: t, land: true });
     return out;
   };
-  /* Open the next land without playing through the one before (owner,
-     20 Oct: Bonnie wanted to play his new levels before finishing the
-     holiday). It counts every land up to the one he's in as won, and
-     opens the next land's first level — its story still plays when he
-     picks it. One land per tap; nothing else in his save changes. */
+  /* Open the next level without finishing the one before (the original
+     opened a land at a time, 20 Oct; here it's a level at a time, for a
+     level someone's stuck on). Nothing else in the save changes. */
   var openNextLand = function () {
-    var land = landOf(Math.max(1, save.unlocked));
-    if (land >= LAND_LAST.length) { gu.msg = 'NOTHING MORE TO OPEN'; sfx('bump'); return; }
-    ['won', 'won2', 'won3', 'won4', 'won5'].slice(0, land).forEach(function (k) { save[k] = true; });
-    save.unlocked = Math.max(save.unlocked, LAND_LAST[land - 1] + 1);
+    if (save.unlocked >= BB.LEVELS.length) { gu.msg = 'NOTHING MORE TO OPEN'; sfx('bump'); return; }
+    save.unlocked++;
     save.at = save.unlocked;
     store(); sfx('power'); gu.msg = 'LEVEL ' + save.unlocked + ' IS OPEN!';
   };
