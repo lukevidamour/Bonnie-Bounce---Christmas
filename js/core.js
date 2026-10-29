@@ -710,7 +710,19 @@
     // the family car's horn: a friendly two-note toot-toot
     toot: function () { voice(392, 392, 0.09, { duty: 0.5, vol: 0.035 }); voice(330, 330, 0.14, { duty: 0.5, vol: 0.035, at: 0.13 }); },
     meow: function () { voice(560, 860, 0.12, { duty: 0.25, vol: 0.035, vib: 1 }); voice(860, 470, 0.26, { duty: 0.25, vol: 0.035, at: 0.12, vib: 1 }); },
-    purr: function () { voice(1.2, 0.9, 0.35, { noise: 0, vol: 0.025, sustain: 0.25 }); }
+    purr: function () { voice(1.2, 0.9, 0.35, { noise: 0, vol: 0.025, sustain: 0.25 }); },
+    /* Christmas: a stomped sprout's raspberry, a snowman's sneeze, a cow's
+       moo, a cracker's bang, sleigh bells, a gull's squawk, Father
+       Christmas's ho ho, a whoosh of letters */
+    pfft: function () { voice(0.7, 0.35, 0.32, { noise: 0, vol: 0.05, sustain: 0.2 }); voice(92, 70, 0.32, { duty: 0.5, vol: 0.035, vib: 1 }); },
+    achoo: function () { voice(330, 520, 0.22, { duty: 0.25, vol: 0.03 }); voice(2.6, 0.6, 0.22, { noise: 0, vol: 0.08, at: 0.24 }); voice(700, 220, 0.18, { duty: 0.5, vol: 0.035, at: 0.24 }); },
+    moo: function () { voice(150, 118, 0.55, { wave: 'tri', vol: 0.14, vib: 1 }); voice(75, 60, 0.55, { duty: 0.5, vol: 0.02, vib: 1 }); },
+    bang: function () { voice(2.8, 0.4, 0.3, { noise: 0, vol: 0.11, sustain: 0.1 }); voice(900, 300, 0.12, { duty: 0.5, vol: 0.04 }); },
+    jingle: function () { arp(['E7', 'G7', 'E7', 'C7', 'E7', 'G7'], 0.045, { duty: 0.25, vol: 0.022 }); },
+    squawk: function () { voice(980, 620, 0.12, { duty: 0.125, vol: 0.035 }); voice(1100, 700, 0.16, { duty: 0.125, vol: 0.035, at: 0.13 }); },
+    hoho: function () { voice(147, 147, 0.16, { wave: 'tri', vol: 0.16 }); voice(131, 131, 0.26, { wave: 'tri', vol: 0.16, at: 0.22 }); },
+    whoosh: function () { voice(0.3, 2.4, 0.5, { noise: 0, vol: 0.05, sustain: 0.3 }); arp(['C5', 'G5', 'C6', 'E6'], 0.07, { duty: 0.25, vol: 0.025 }); },
+    shake: function () { voice(3.2, 2.4, 0.4, { noise: 1, vol: 0.03, sustain: 0.3 }); arp(['E7', 'C7', 'G6', 'E7', 'C7'], 0.07, { duty: 0.25, vol: 0.018 }); }
   };
   BB.sfx = function (name) { if (!ready() || !SFX[name]) return; try { SFX[name](); } catch (e) {} };
 

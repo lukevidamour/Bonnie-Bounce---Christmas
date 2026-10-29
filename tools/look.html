@@ -15,11 +15,15 @@
 <script src="../js/core.js"></script>
 <script src="../js/art.js"></script>
 <script src="../js/creatures.js"></script>
+<script src="../js/creaturesx.js"></script>
 <script src="../js/family.js"></script>
 <script>
   var q = function (k, d) { var m = new RegExp('[?&]' + k + '=([^&]+)').exec(location.search); return m ? decodeURIComponent(m[1]) : d; };
   var A = BB.ART, Z = +q('z', 8), who = q('who', 'bonnie,beau,winnie,ollie,grace,lucy,luke').split(','), ks = q('k', 'idle,cheer').split(','), sz = q('s', '') ? 's' : 'b';
   var items = [];
+  // &e=sprout,gus: every frame of those creatures (BB.ART.en), instead of players
+  var flatten = function (v) { if (!v) return; if (v.rows) items.push(v); else if (Array.isArray(v)) v.forEach(flatten); else Object.keys(v).forEach(function (k) { flatten(v[k]); }); };
+  if (q('e', '')) { q('e', '').split(',').forEach(function (k) { flatten(A.en[k] || A[k]); }); who = []; }
   who.forEach(function (w) {
     ks.forEach(function (k) {
       if (k === 'cameo') { if (A.family[w]) items.push(A.family[w].idle); return; }
