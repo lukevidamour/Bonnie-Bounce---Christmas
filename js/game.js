@@ -3840,7 +3840,7 @@
     update: function (e) {
       var p = G.p;
       if (e.hurtT) e.hurtT--;
-      if (e.st === 'wait') { e.y = e.y0 + Math.sin(e.t * 0.06) * 3; if (p.x > e.x - BB.W * 0.55) { e.st = 'fly'; e.t2 = 0; G.bossOn = true; BB.music(BOSS_SONG[0]); sayAt('MY BELL! ALL MINE!', e.x + 11, e.y - 12, '#ffffff'); sfx('squawk'); } return; }
+      if (e.st === 'wait') { e.y = e.y0 + Math.sin(e.t * 0.06) * 3; if (p.x > e.x - BB.W * 0.55) { e.st = 'fly'; e.t2 = 0; G.bossOn = true; BB.music(BOSS_SONG[0]); sayAt('MY BELL! ALL MINE!', e.x + 11, Math.max(G.cam.y + 34, e.y + e.h + 6), '#ffffff'); sfx('squawk'); } return; }
       if (e.st === 'fly') {
         e.t2++;
         e.x = e.x0 - 60 + Math.sin(e.t2 * 0.018) * 64; e.y = e.y0 + Math.sin(e.t2 * 0.07) * 6;
@@ -3870,7 +3870,7 @@
         e.st = 'sorry'; e.enemy = false; G.bossOn = false;
         sayAt('SORRY! HERE’S YOUR BELL!', e.x + 11, e.y - 14, '#ffe048');
         addEnt('bell', e.x - 8, e.y - 6, {});
-      } else { e.st = 'up'; e.t2 = 0; sayAt(e.hp === 2 ? 'SQUAWK!' : 'NOT MY BELL!', e.x + 11, e.y - 10, '#ffffff'); }
+      } else { e.st = 'up'; e.t2 = 0; sayAt(e.hp === 2 ? 'SQUAWK!' : 'NOT MY BELL!', e.x + 11, Math.max(G.cam.y + 34, e.y - 10), '#ffffff'); }
     },
     draw: function (ctx, e) {
       var Gs = E.gus;
@@ -6310,7 +6310,7 @@
       UI.round(ctx, bx, 76, bw, 8, INK, 2); UI.round(ctx, bx + 1, 77, (bw - 2) * Math.min(1, gu.hold / 90), 6, PICK, 1.5);
       return;
     }
-    BB.text(ctx, 'RECORD A VOICE FOR BONNIE', W / 2, 20, { color: INK, align: 'center' });
+    BB.text(ctx, 'RECORD A VOICE FOR THE BOYS', W / 2, 20, { color: INK, align: 'center' });
     var rc = BB.voice && BB.voice.recording();
     VOICES.forEach(function (v, r) {
       var y = 34 + r * 20;
