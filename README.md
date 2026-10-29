@@ -140,6 +140,17 @@ there on the wreck's deck. In level 9 it's "SEE YOU ON SARK!". On the map
 he circles the island with the bell, and once his nest is found he's off
 east, towards Sark.
 
+**Why he did it.** Beaten on Sark he gives the bell back: SORRY! Then,
+quietly: I LOVE SHINY THINGS... NO PRESENTS FOR GULLS... On the roof at
+midnight Father Christmas says "I HAVE AN IDEA FOR GUS!", and on
+Christmas morning a present drops from the sleigh as it flies over: a
+little golden bell of his own, on a red ribbon (A BELL OF MY OWN!).
+
+**Father Christmas on the map.** The first time you clear a level he
+pops up at the foot of the map with who's home and how many are left
+to find: "DASHER'S HOME! SEVEN MORE TO FIND!", "MY HAT! HO HO HO!",
+"BLITZEN'S HOME! ALL 8! NOW MY BELL!".
+
 After level 11 comes **Christmas morning**: the whole family round the
 tree, Bear and Prince in jumpers, Gus in a paper crown with a bag of
 chips, and Father Christmas flying over with all eight reindeer. Then the
@@ -175,7 +186,13 @@ The friends:
   them home and their faces light up on that level's tag on the map.
 - **Advent-calendar doors**, 24 across the eleven levels, mostly in
   secret places. Each one found opens that door in the sticker book's
-  advent calendar.
+  advent calendar. Find all 24 and a big golden door 25 appears in the
+  middle of the calendar: **CHRISTMAS DAY**, a bonus level. Christmas
+  morning in the snow, with Father Christmas waving you off, presents in
+  every block, a cracker every few steps, the whole of Jingle Bells laid
+  into the path, a sledge run, balloons, snowmen to snowball,
+  knock-knock doors with the family behind them, and the cottage at the
+  end. It has nothing to find and no medals: it's just a treat.
 - **Christmas crackers.** Touch one and BANG: confetti, a joke, a
   surprise (stars, a heart, a cupcake), and a **paper crown** on your
   head. While you wear it, a bump takes the crown instead of your heart.
@@ -188,7 +205,12 @@ The friends:
 a pit, and you start again from the flag. Lives are unlimited. When
 you're big (a cupcake), a bump shrinks you first; a paper crown goes
 before that. A **heart** from a present gives a second heart for the rest
-of the level.
+of the level. **Winnie**, at five the youngest, has the second heart from
+the start of every level and every flag.
+
+**A helping hand:** fall into the same gap three times and a **snow
+cloud** drifts in across it (HOP ON THE CLOUD!), there for the rest of
+the level, even after a restart at the flag. The robots play without it.
 
 **Power-ups** come out of the presents: the **cupcake** (big, can smash
 bricks), the **Super Ball** (throw bouncing balls), the **rainbow lolly**
@@ -202,7 +224,8 @@ BOOK, top left of the map:
   from
 - **WHO'S PLAYING?:** tap who you want to be
 - **CREATURES:** everyone you've met
-- **ADVENT CALENDAR:** the 24 doors
+- **ADVENT CALENDAR:** the 24 doors, and once they're all open, door 25:
+  Christmas Day
 - **OUTFITS:** these fit everyone
 
 | Outfit | Won by |
@@ -224,6 +247,12 @@ own "Yay!", "Wheee!" and "Well done!", played at flags, on springs and
 when a level's clear. The clips stay on that device, and they're this
 edition's own (record them again here). **OPEN LEVEL n** opens the next
 level without finishing the one before, one per tap.
+
+**TURNS** is for children sharing one game. Tap it to choose who's
+sharing: BEAU+WINNIE, BONNIE+BEAU, BONNIE+WINNIE or ALL THREE (or OFF).
+Then at every flag, and at the end of every level, it's the next one's
+go: "WINNIE'S TURN!", with a sparkle, and Winnie's second heart. The
+choice stays on that device, through a new game too.
 
 ## Two editions, one address
 

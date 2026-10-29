@@ -213,7 +213,8 @@
     BB.steps(0, null);
     if (quiet) return { ok: !!done, bestX: bestX, bestRow: bestRow };
     var name = BB.LEVELS[n - 1].name;
-    var mnote = medals === 3 ? '' : ' <span class="bad">— ' + medals + ' medals (every level should have 3)</span>';
+    // (every island level has 3; the bonus, Christmas Day, has none: it's a treat)
+    var mnote = medals === 3 || (BB.LEVELS[n - 1] && BB.LEVELS[n - 1].bonus) ? '' : ' <span class="bad">— ' + medals + ' medals (every level should have 3)</span>';
     mnote += flagsNote(n);
     if (done) say('<span class="ok">✓ ' + n + ' ' + name + '</span> — finished in ' + (done.frames / 60).toFixed(1) + 's of play (' + n2 + ' tries, ' + ms + 'ms, ' + G.w + ' tiles long)' + mnote);
     else say('<span class="bad">✗ ' + n + ' ' + name + '</span> —  got no nearer than tile ' + bestX + ', row ' + bestRow + ' (' + Math.round(best) + 'px from the end) after ' + n2 + ' tries');
@@ -452,6 +453,8 @@
   else if (m1) for (var i = +m1[1]; i <= +(m1[2] || m1[1]); i++) list.push(i);
   else list = [1];
   BB.music = function () {};
+  // the robots prove every level can be done without the helping hand's snow clouds (game.js helpFall)
+  BB.robot = true;
   // one level at a time, so the page can draw in between
   // (for trying the hunt on a level changed in the console: stuckRun(46))
   window.stuckRun = function (n) { STUCK = true; stuckRun(n); };

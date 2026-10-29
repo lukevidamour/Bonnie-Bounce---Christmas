@@ -51,6 +51,13 @@
   var LAND_LAST = [11];
   var landOf = function (n) { for (var i = 0; i < LAND_LAST.length; i++) if (n <= LAND_LAST[i]) return i + 1; return LAND_LAST.length; };
   var landLast = function (n) { return LAND_LAST[landOf(n) - 1]; };
+  /* The island's eleven levels — and after them, not one of them, the
+     bonus: Christmas Day, behind the advent calendar's big last door once
+     all 24 are open (levelsx.js { bonus: true }). playN is the bonus while
+     it's being played (the card and the level), 0 the rest of the time. */
+  var NL = BB.LEVELS.filter(function (d) { return !d.bonus; }).length;
+  var BONUS_N = BB.LEVELS.map(function (d) { return !!d.bonus; }).indexOf(true) + 1;
+  var playN = 0;
   var BOSS_SONG = ['gusboss'];
   // the level-clear jingle (Christmas's own, when musicx.js has it)
   var CLEAR_SONG = BB.SONGS && BB.SONGS.xclear ? 'xclear' : 'clear';
@@ -73,7 +80,7 @@
   var store = function () { try { localStorage.setItem(KEY, JSON.stringify(save)); } catch (e) {} };
   var hasProgress = function () { return save.unlocked > 1 || save.cleared.length > 0 || save.score > 0; };
   var qs = location.search;
-  if (/[?&]debug\b/.test(qs)) save.unlocked = BB.LEVELS.length;
+  if (/[?&]debug\b/.test(qs)) save.unlocked = NL;
 
   var scene = 'title', sceneT = 0, G = null, tick = 0;
   var go = function (s) { scene = s; sceneT = 0; };
@@ -152,7 +159,7 @@
       ents: [], fx: [], cam: { x: 0, y: 0 }, tick: 0, freeze: 0, shake: 0,
       water: !!def.water, ice: !!def.ice || !!th.ice, check: fromCheck || 0, bossOn: false, bossDone: false,
       ambient: [], gfx: theme(def.theme), deco: L.deco, blooms: [], hitstop: 0, kick: 0,
-      hp: HP_MAX, hpMax: HP_MAX, hpGlow: 0, starHeal: 0, safe: null, secretIn: 0, secretFound: {}
+      hp: startHp(), hpMax: startHp(), hpGlow: 0, starHeal: 0, safe: null, secretIn: 0, secretFound: {}
     };
     // the sea, where the beach has a gap
     // the rainbow's paint blocks start switched off (or in the level's own colour)
@@ -170,6 +177,7 @@
     G.snow = def.snow !== undefined ? def.snow : n > 2 ? 1 : 0;
     G.joke = null; G.delivered = 0; later = [];
     prepTerrain();
+    if (helpFalls.n === n) helpFalls.bridges.forEach(addBridge); else helpFalls = { n: n, at: {}, bridges: [] };
     var start = L.start, chk = null;
     /* back at the checkpoint he reached: fromCheck is that flag's x (a
        long level can have two; touching only the first must not start him
@@ -753,7 +761,7 @@
     }
   };
   // what a spring looks like in each world: a mushroom in the woods, a market awning in the village…
-  var SPRING_ART = { stpeterport: 'awning', candie: 'presentspring', cornet: 'pudspring', lanes: 'pudspring', saumarez: 'presentspring', bays: 'pudspring',
+  var SPRING_ART = { xmorning: 'presentspring', stpeterport: 'awning', candie: 'presentspring', cornet: 'pudspring', lanes: 'pudspring', saumarez: 'presentspring', bays: 'pudspring',
     fortgrey: 'presentspring', townlights: 'awning', herm: 'pudspring', sark: 'presentspring', rooftops: 'presentspring', woods: 'shroom', glow: 'shroom', village: 'awning', bakery: 'dough', magic: 'bouncy', night: 'bouncy', ogliss: 'ring', puydufou: 'catapult',
     jamaica: 'drum', rainbow: 'cloudspring', chocolate: 'marshmallow', beeland: 'flowerspring',
     conkerwood: 'shroom', trickortreat: 'webspring', pumpkintown: 'webspring', graveyard: 'gravespring', mansion: 'organpipe', witchwood: 'glowshroom', witchtower: 'glowshroom' };
@@ -777,8 +785,14 @@
       if (!e.up && p.x + p.w > e.x) {
         e.up = 1; G.check = Math.max(G.check || 0, e.x); sfx('check'); if (BB.voice) BB.voice.play('yay'); p.waveT = 50;
         G.ents.forEach(function (b) { if (b.k === 'bear' && b.mode === 'follow') b.happy = 50; });
-        var gs = 'GO ' + nameOf(who()) + '!';
-        fx('text', e.x + 2 - BB.textW(gs) / 2, e.y - 8, { s: gs, vy: -0.4, life: 60, col: '#ff94cc' });
+        // (taking turns: the next one's go, with a sparkle — and Winnie's second heart)
+        var nx = passTurn(), gs = nx ? nameOf(nx) + "'S TURN!" : 'GO ' + nameOf(who()) + '!';
+        if (nx) {
+          sfx('jingle');
+          if (nx === 'winnie' && G.hpMax < EXTRA_MAX) { G.hpMax = EXTRA_MAX; G.hp = EXTRA_MAX; G.hpGlow = 50; }
+          for (var si = 0; si < 8; si++) fx('sparkle', p.x + p.w / 2 - 7 + (si % 4) * 4, p.y - 2 + (si >> 2) * 9, { life: 18 });
+        }
+        fx('text', e.x + 2 - BB.textW(gs) / 2, e.y - 8, { s: gs, vy: -0.4, life: nx ? 90 : 60, col: '#ff94cc' });
       }
       if (e.up && e.up < 24) e.up++;
     },
@@ -1017,6 +1031,16 @@
   var CALL = { bonnie: 'BONNIE', beau: 'BEAU', winnie: 'WINNIE', lucy: 'AUNTY LUCY', luke: 'UNCLE LUKE', grace: 'AUNTY GRACE', ollie: 'UNCLE OLLIE' };
   var nameOf = function (w) { return CALL[w]; };
   var who = function () { return WHO.indexOf(save.who) > -1 ? save.who : 'bonnie'; };
+  /* Take turns (on the grown-ups' page, Luke 29 Oct): two or three of the
+     children sharing one game — at every flag, and at the end of every
+     level, it's the next one's go: WINNIE'S TURN! Kept on this device. */
+  var TURNS = [null, ['beau', 'winnie'], ['bonnie', 'beau'], ['bonnie', 'winnie'], ['bonnie', 'beau', 'winnie']];
+  var TURN_NAME = ['OFF', 'BEAU+WINNIE', 'BONNIE+BEAU', 'BONNIE+WINNIE', 'ALL THREE'];
+  var turns = 0;
+  try { turns = Math.max(0, Math.min(TURNS.length - 1, +localStorage.getItem('bonnie-christmas-turns') || 0)); } catch (e) {}
+  // (never for the robots, who play every level with one heart)
+  var nextTurn = function () { var set = !BB.robot && TURNS[turns]; return set ? set[(set.indexOf(who()) + 1) % set.length] : null; };
+  var passTurn = function () { var nx = nextTurn(); if (nx && nx !== who()) { save.who = nx; store(); return nx; } return null; };
   var hero = function () { return (A.player && A.player(who())) || A.bonnie; };
   // the sprites an outfit is drawn from: the player's usual ones, or a kit's own set
   var outfitSet = function (o, big) { var P = hero(), k = o && o.set && P.kits && P.kits[o.set]; return k ? (big ? k.b : k.s) : big ? P.b : P.s; };
@@ -3565,6 +3589,11 @@
       e.open = 1;
       if (!(save.advent & e.bit)) { save.advent |= e.bit; store(); }
       sfx('secret'); sayAt('DOOR ' + e.sp.n + '!', e.x + e.w / 2, e.y - 12, '#ffe048');
+      // the last of the 24: the big door in the sticker book is ready
+      if (save.advent === 0xffffff && !e.had) {
+        setTimeout0(e, 70, function () { sayAt('ALL 24 DOORS!', e.x + e.w / 2, e.y - 12, '#ff94cc'); sfx('jingle'); });
+        setTimeout0(e, 150, function () { sayAt('LOOK IN YOUR BOOK!', e.x + e.w / 2, e.y - 12, '#ffffff'); });
+      }
       for (var k = 0; k < 4; k++) fx('coin', e.x + k * 2, e.y - k, { vy: -3.2 - k * 0.3, life: 26 });
       addStars(4); points(500, e.x, e.y);
     },
@@ -3867,6 +3896,10 @@
         e.st = 'sorry'; e.enemy = false; G.bossOn = false;
         sayAt('SORRY! HERE’S YOUR BELL!', e.x + 11, e.y - 14, '#ffe048');
         addEnt('bell', e.x - 8, e.y - 6, {});
+        // why he did it (Father Christmas has an idea: Over the Rooftops, and Christmas morning)
+        // (up near the top of the screen, clear of THE GOLDEN BELL! when it's picked up)
+        setTimeout0(e, 70, function () { sayAt('I LOVE SHINY THINGS...', e.x + 11, G.cam.y + 36, '#e8ecf4'); });
+        setTimeout0(e, 150, function () { sayAt('NO PRESENTS FOR GULLS...', e.x + 11, G.cam.y + 36, '#e8ecf4'); });
       } else { e.st = 'up'; e.t2 = 0; sayAt(e.hp === 2 ? 'SQUAWK!' : 'NOT MY BELL!', e.x + 11, Math.max(G.cam.y + 34, e.y - 10), '#ffffff'); }
     },
     draw: function (ctx, e) {
@@ -4124,6 +4157,10 @@
      and he carries on, a fall bubbles him back to safe ground. Back at a
      flag after the last one goes, it's one heart again. */
   var EXTRA_MAX = 4;
+  /* Winnie, at five the youngest, has the second heart from the start of
+     every level and every flag (Luke, 29 Oct: "to make it easier for
+     him"). Everyone else starts with one. */
+  var startHp = function () { return who() === 'winnie' && !BB.robot ? EXTRA_MAX : HP_MAX; };
   var extraHeart = function (x, y) {
     if (G.hpMax >= EXTRA_MAX && G.hp >= G.hpMax) return false;
     G.hpMax = EXTRA_MAX; G.hp = EXTRA_MAX; G.hpGlow = 50;
@@ -4166,10 +4203,59 @@
     sfx('hurt');
     for (var i = 0; i < 4; i++) fx('spark', p.x + p.w / 2, p.y + 4, { vx: (i - 1.5) * 0.7, vy: -1.2, life: 26, col: '#ff6a8a' });
   };
+  /* A helping hand: fall into the same gap three times and a snow cloud
+     drifts in across it to walk over, there for the rest of the level
+     (it stays through a restart at the flag). Never for the robots, who
+     must prove every level can be done without it. */
+  var helpFalls = { n: 0, at: {}, bridges: [] };
+  var helpFall = function () {
+    if (BB.robot || !G.safe) return;
+    if (helpFalls.n !== G.n) helpFalls = { n: G.n, at: {}, bridges: [] };
+    var key = Math.round(G.safe.x / 48);
+    helpFalls.at[key] = (helpFalls.at[key] || 0) + 1;
+    if (helpFalls.at[key] < 3) return;
+    var br = findGap(G.safe);
+    if (!br || helpFalls.bridges.some(function (b) { return b.x === br.x && b.row === br.row; })) return;
+    helpFalls.bridges.push(br);
+    addBridge(br);
+  };
+  // the gap ahead of where he last stood safely: from the first column with no ground at his feet to the next ground
+  var findGap = function (safe) {
+    var r = Math.floor((safe.y + G.p.h) / T), tx = Math.floor((safe.x + G.p.w / 2) / T), c0 = -1, c1 = -1, c, y;
+    var solidAt = function (cx, cy) { var t = tileAt(cx, cy); return SOLID[t] && t !== TL.SPIKE; };
+    for (c = tx; c < tx + 14 && c < G.w; c++) if (!solidAt(c, r)) { c0 = c; break; }
+    if (c0 < 0) return null;
+    for (c = c0 + 1; c < c0 + 40 && c < G.w; c++) { for (y = Math.max(0, r - 2); y <= Math.min(G.h - 1, r + 4); y++) if (solidAt(c, y)) break; if (y <= Math.min(G.h - 1, r + 4)) { c1 = c; break; } }
+    if (c1 < 0) return null;
+    return { x: c0, w: c1 - c0, row: r };
+  };
+  var addBridge = function (b) {
+    var e = spawn({ k: 'cloudbridge', x: b.x * T, row: b.row, w: b.w });
+    if (e) { e.active = true; G.ents.push(e); }
+  };
+  /* The snow cloud: puffy and white, gently breathing, a little sparkle
+     on it; the first time it comes into view, HOP ON THE CLOUD! */
+  KINDS.cloudbridge = {
+    w: 8, h: 6, top: true,
+    init: function (e, sp) { e.w = sp.w * T; e.y = sp.row * T; },
+    update: function (e) {
+      if (!e.said && e.x < G.cam.x + BB.W - 20 && e.x + e.w > G.cam.x + 20) { e.said = true; sfx('jingle'); sayAt('HOP ON THE CLOUD!', e.x + e.w / 2, e.y - 14, '#ffffff'); }
+      if (!reduce && e.t % 20 === 0) fx('sparkle', e.x + ((e.t * 7) % Math.max(8, e.w)), e.y - 4, { life: 15 });
+    },
+    draw: function (ctx, e) {
+      var x0 = e.x - G.cam.x, y0 = e.y - G.cam.y, n = Math.ceil(e.w / 5), i, b;
+      for (var pass = 0; pass < 3; pass++) for (i = 0; i <= n; i++) {
+        var cx = x0 + i * e.w / n, cy = y0 + 3 + (i % 2 ? 1 : 0) + (reduce ? 0 : Math.sin(e.t * 0.05 + i) * 0.5), r = 3.6 + (i % 3 ? 0.4 : 1);
+        b = pass === 0 ? r + 0.7 : pass === 1 ? r : r - 1.6;
+        BB.icons.disc(ctx, cx, cy - (pass === 2 ? 1 : 0), b, pass === 0 ? '#5a6a9a' : pass === 1 ? '#dce8fa' : '#ffffff');
+      }
+    }
+  };
   // into a pit or the lava: a heart, and back up in a bubble on safe ground
   var fallOut = function () {
     var p = G.p;
     if (p.st !== 'play') return;
+    helpFall();
     if (p.mount && G.safe) { if (p.mount === 'broom') broomOff(p); if (p.mount === 'sleigh') sleighOff(p); p.mount = null; }
     else if (G.hp <= 2 || !G.safe) { G.hp = 0; die(); return; }
     else { G.hp -= 2; G.hpGlow = 40; }
@@ -4692,12 +4778,13 @@
         var hx = G.ents.filter(function (q) { return q.k === 'house'; })[0];
         if (hx) firework(hx.x + 20 + (p.t - 60) * 0.8, hx.y - 30 - (p.t % 60) * 0.3);
       }
+      if (G.clearDone && p.t > 100 && G.def.bonus) { store(); go('clear'); return; }
       if (G.clearDone && p.t > 100) {
         save.best = save.best || {};
         save.best[G.n] = Math.max(save.best[G.n] || 0, G.got || 0);
         var landEnd = landLast(G.n);
         save.unlocked = Math.max(save.unlocked, Math.min(landEnd, G.n + 1));
-        if (save.cleared.indexOf(G.n) < 0) save.cleared.push(G.n);
+        if (save.cleared.indexOf(G.n) < 0) { save.cleared.push(G.n); justCleared = G.n; }
         G.bearHome = bearWith === G.n;
         if (G.bearHome) save.bears[G.n] = 1;
         G.princeHome = princeWith === G.n;
@@ -4731,12 +4818,12 @@
     var p = G.p, n = G.n;
     p.st = 'cheer'; p.t = 0; p.vx = 0;
     BB.music(CLEAR_SONG, function () { G.clearDone = true; });
-    if (save.cleared.indexOf(n) < 0) save.cleared.push(n);
+    if (save.cleared.indexOf(n) < 0) { save.cleared.push(n); justCleared = n; }
     G.bearHome = bearWith === n; if (G.bearHome) save.bears[n] = 1;
     G.princeHome = princeWith === n; if (G.princeHome) save.princes[n] = 1;
     save.best = save.best || {}; save.best[n] = Math.max(save.best[n] || 0, G.got || 0);
-    save.unlocked = Math.max(save.unlocked, Math.min(BB.LEVELS.length, n + 1));
-    save.at = Math.min(BB.LEVELS.length, n + 1);
+    save.unlocked = Math.max(save.unlocked, Math.min(NL, n + 1));
+    save.at = Math.min(NL, n + 1);
     store();
   };
 
@@ -5836,7 +5923,9 @@
   };
   var HUDINK = '#2a1640';
   // each level's colour (its ribbon, its WHERE TO? tile): harbour gold, frost blue, castle grey-gold, lane green, park red…
-  var LEVEL_COL = ['#e0a020', '#4a96dc', '#a0784a', '#3a9a48', '#d8343c', '#e8704a', '#7458c8', '#e8822a', '#2aa8c0', '#3a4aa8', '#c8283a'];
+  var LEVEL_COL = ['#e0a020', '#4a96dc', '#a0784a', '#3a9a48', '#d8343c', '#e8704a', '#7458c8', '#e8822a', '#2aa8c0', '#3a4aa8', '#c8283a', '#d8a020'];
+  // a level's label: its number, or for the bonus, CHRISTMAS DAY's own
+  var levelLabel = function (n, short) { return BB.LEVELS[n - 1] && BB.LEVELS[n - 1].bonus ? (short ? 'XMAS' : 'BONUS!') : short ? String(n) : 'LEVEL ' + n; };
   BB.hud = { pause: null };
   // a heart for the HUD: full, half or empty (fill 2, 1, 0)
   var heartIcon = function (ctx, x, y, fill, glow) {
@@ -5882,7 +5971,7 @@
     var right = W - 2;
     if (BB.inputMode === 'touch') { BB.hud.pause = { on: 'screen', x: W - 18, y: 0, w: 18, h: 16 }; BB.icons.pause(ctx, W - 13, 2.5); right = W - 16; }
     else BB.hud.pause = null;
-    var lv = W > 200 ? 'LEVEL ' + G.n : String(G.n), bw = BB.textW(lv) + 16;
+    var lv = levelLabel(G.n, W <= 200), bw = BB.textW(lv) + 16;
     BB.ui.ribbon(ctx, right - bw / 2 - 6, 2, lv, LEVEL_COL[G.n - 1]);
   };
   var pad = function (n, l) { n = String(Math.max(0, n | 0)); while (n.length < l) n = '0' + n; return n; };
@@ -5988,7 +6077,7 @@
     var won = save.won, was = who();
     save = fresh();
     save.won = won;
-    if (/[?&]debug\b/.test(qs)) save.unlocked = BB.LEVELS.length;
+    if (/[?&]debug\b/.test(qs)) save.unlocked = NL;
     store();
     pickAt = Math.max(0, WHO.indexOf(was)); picked = false;
     wipeTo(function () { go('pick'); });  // who's playing, then the story, which goes straight on into Level 1
@@ -6273,6 +6362,33 @@
     return n;
   };
   var mapW = function () { return BB.Map.width ? BB.Map.width() : BB.Map.widthFor(save.won); };
+  /* Father Christmas at the foot of the map after a level's first clear
+     (Luke, 29 Oct): who's home, and how many still to find — DASHER'S
+     HOME! SEVEN MORE TO FIND! — for a few seconds, then he's gone. */
+  var mapCheer = null, justCleared = 0;
+  var NUMW = ['NO', 'ONE', 'TWO', 'THREE', 'FOUR', 'FIVE', 'SIX', 'SEVEN', 'EIGHT'];
+  var cheerLines = function (n) {
+    var fd = BB.LEVELS[n - 1] && BB.LEVELS[n - 1].found, left = 8 - reindeerHome();
+    if (n === 10) return ['MY BELL! HO HO HO!', "NOW, LET'S FLY!"];
+    if (!fd) return null;
+    var more = left <= 0 ? 'ALL 8! NOW MY BELL!' : NUMW[left] + ' MORE TO FIND!';
+    return [fd.who === 'hat' ? 'MY HAT! HO HO HO!' : fd.who.toUpperCase() + "'S HOME!", more];
+  };
+  var drawCheer = function (ctx) {
+    var c = mapCheer;
+    if (!c || mapWalk) return;
+    var lines = cheerLines(c.n), S6 = E.santa;
+    if (!lines || !S6) return;
+    var W = BB.W, sf = S6.wave[Math.floor(c.t / 12) % 2], tw = Math.max(BB.textW(lines[0]), BB.textW(lines[1])) + 12, bh = 19;
+    var gw = sf.w + 3 + tw, gx = Math.round(W / 2 - gw / 2), slide = reduce ? 0 : c.t < 16 ? (16 - c.t) * 3 : c.t > 314 ? (c.t - 314) * 3 : 0;
+    var bx = gx + sf.w + 3, by = H - 44 + slide;
+    BB.draw(ctx, sf, gx, H - 19 - sf.h + slide);
+    UI.paper(ctx, bx, by, tw, bh, { stitch: false });
+    // the bubble's tail, pointing at him
+    ctx.fillStyle = INK; for (var k = 0; k < 4; k += 0.5) ctx.fillRect(bx - k - 0.5, by + 11 + k * 0.5, 1 + k * 0.4, 0.5);
+    BB.text(ctx, lines[0], bx + tw / 2, by + 3, { color: PICK, align: 'center' });
+    BB.text(ctx, lines[1], bx + tw / 2, by + 11, { color: INK, align: 'center' });
+  };
   var mapEnter = function (walkFrom) {
     var at = Math.max(1, Math.min(save.unlocked, save.at || 1));
     save.at = at;
@@ -6306,6 +6422,7 @@
   var stepTo = function (n) { mapWalk = { from: save.at, to: n, t: 0 }; mapFace = n > save.at ? 1 : -1; save.at = n; };
   var updateMap = function () {
     sceneT++;
+    if (mapCheer && !mapWalk && ++mapCheer.t > 330) mapCheer = null;
     if (mapWalk) {
       // (on the way to somewhere further along, he hurries through the stops in between)
       mapWalk.t += mapGoal && mapGoal !== mapWalk.to ? 3 : 1;
@@ -6322,7 +6439,7 @@
       // a tap on a level's medallion walks him there; on his own, or on PLAY, it starts
       var tp = BB.tap, tappedNode = 0;
       if (tp && tp.on === 'screen' && sceneT > 10) {
-        for (var i = 0; i < BB.LEVELS.length; i++) { var q = nodePos(i); if (Math.hypot(tp.x + mapCam - q.x, tp.y - q.y) < 11) tappedNode = i + 1; }
+        for (var i = 0; i < NL; i++) { var q = nodePos(i); if (Math.hypot(tp.x + mapCam - q.x, tp.y - q.y) < 11) tappedNode = i + 1; }
         if (Math.hypot(tp.x + mapCam - mapX, tp.y - (mapY - 10)) < 10) tappedNode = save.at;
       }
       var pb = playBtn(), bb = bookBtn();
@@ -6395,6 +6512,7 @@
         BB.prompt(ctx, parts, W / 2, H - 14.5, { align: 'center', color: INK, shadow: null });
       }
     }
+    drawCheer(ctx);
   };
 
   /* ---- for grown-ups --------------------------------------------------------------
@@ -6409,21 +6527,29 @@
     var W = BB.W, x0 = W - 80, out = [];
     VOICES.forEach(function (v, r) { [['REC', 24], ['PLAY', 30], ['X', 12]].forEach(function (b, c) { var x = x0 + [0, 27, 60][c]; out.push({ r: r, c: c, x: x, y: 34 + r * 20, w: b[1], h: 14, t: b[0] }); }); });
     // and under the voices, a button to open the next level
-    var t = save.unlocked < BB.LEVELS.length ? 'OPEN LEVEL ' + (save.unlocked + 1) : 'ALL LEVELS OPEN';
-    out.push({ r: 3, c: 0, x: W / 2 - 50, y: 98, w: 100, h: 14, t: t, land: true });
+    var t = save.unlocked < NL ? 'OPEN LEVEL ' + (save.unlocked + 1) : 'ALL LEVELS OPEN';
+    out.push({ r: 3, c: 0, x: W / 2 - 50, y: 93, w: 100, h: 14, t: t, land: true });
+    // and taking turns: who's sharing (tap to go round the choices)
+    out.push({ r: 4, c: 0, x: W / 2 - 64, y: 109, w: 128, h: 14, t: 'TURNS: ' + TURN_NAME[turns], land: true });
     return out;
   };
   /* Open the next level without finishing the one before (the original
      opened a land at a time, 20 Oct; here it's a level at a time, for a
      level someone's stuck on). Nothing else in the save changes. */
   var openNextLand = function () {
-    if (save.unlocked >= BB.LEVELS.length) { gu.msg = 'NOTHING MORE TO OPEN'; sfx('bump'); return; }
+    if (save.unlocked >= NL) { gu.msg = 'NOTHING MORE TO OPEN'; sfx('bump'); return; }
     save.unlocked++;
     save.at = save.unlocked;
     store(); sfx('power'); gu.msg = 'LEVEL ' + save.unlocked + ' IS OPEN!';
   };
   var guDo = function (r, c) {
     if (r === 3) { openNextLand(); return; }
+    if (r === 4) {
+      turns = (turns + 1) % TURNS.length;
+      try { localStorage.setItem('bonnie-christmas-turns', String(turns)); } catch (e) {}
+      sfx('select'); gu.msg = turns ? 'A NEW GO AT EVERY FLAG' : 'TAKING TURNS IS OFF';
+      return;
+    }
     var n = VOICES[r][0];
     if (!BB.voice || !BB.voice.can()) { gu.msg = 'NO MICROPHONE HERE'; sfx('bump'); return; }
     if (c === 0) { gu.msg = 'SAY IT NOW!'; BB.audioKick(); BB.voice.record(n, function (ok) { gu.msg = ok ? 'SAVED' : 'COULD NOT RECORD'; }); }
@@ -6440,8 +6566,8 @@
       return;
     }
     if (BB.voice && BB.voice.recording()) return;
-    if (BB.hit('up')) { gu.row = (gu.row + 3) % 4; sfx('select'); }
-    if (BB.hit('down')) { gu.row = (gu.row + 1) % 4; sfx('select'); }
+    if (BB.hit('up')) { gu.row = (gu.row + 4) % 5; sfx('select'); }
+    if (BB.hit('down')) { gu.row = (gu.row + 1) % 5; sfx('select'); }
     if (BB.hit('left')) { gu.col = (gu.col + 2) % 3; sfx('select'); }
     if (BB.hit('right')) { gu.col = (gu.col + 1) % 3; sfx('select'); }
     if (BB.hit('a')) guDo(gu.row, gu.col);
@@ -6461,7 +6587,7 @@
       UI.round(ctx, bx, 76, bw, 8, INK, 2); UI.round(ctx, bx + 1, 77, (bw - 2) * Math.min(1, gu.hold / 90), 6, PICK, 1.5);
       return;
     }
-    BB.text(ctx, 'RECORD A VOICE FOR THE BOYS', W / 2, 20, { color: INK, align: 'center' });
+    BB.text(ctx, 'RECORD YOUR VOICE', W / 2, 20, { color: INK, align: 'center' });
     var rc = BB.voice && BB.voice.recording();
     VOICES.forEach(function (v, r) {
       var y = 34 + r * 20;
@@ -6475,7 +6601,7 @@
       if (live) { ctx.fillStyle = '#c8304a'; ctx.fillRect(b.x + 1, b.y + b.h - 3, (b.w - 2) * rc.k, 2); }
       BB.text(ctx, b.t, b.x + b.w / 2, b.y + 3.5, { color: live ? '#ffffff' : INK, align: 'center' });
     });
-    BB.text(ctx, gu.msg || 'KEPT ON THIS DEVICE ONLY', W / 2, H - 22, { color: gu.msg ? PICK : UI.SOFT, align: 'center' });
+    BB.text(ctx, gu.msg || 'KEPT ON THIS DEVICE ONLY', W / 2, H - 16, { color: gu.msg ? PICK : UI.SOFT, align: 'center' });
   };
 
   /* ---- the sticker book ----------------------------------------------------------
@@ -6573,6 +6699,13 @@
       E.bear.sit[0], E.prince && E.prince.sit[0], T6.gache, E.xcrab && E.xcrab[0], T6.pudding, E.cow && E.cow.walk[0], E.gus && E.gus.sit, A.cottage && A.cottage.snowShut][d] || A.starSmall;
   };
   var bookPage = 0, outfitAt = 0;
+  // the advent calendar's big last door (all 24 open), and opening it: the bonus level
+  var bigDoor = function () { return { x: BB.W / 2 - 24, y: 40, w: 48, h: 50 }; };
+  var startBonus = function () {
+    if (!BONUS_N || wipe) return;
+    sfx('start'); playN = BONUS_N; cardCheck = false; bearWith = 0; princeWith = 0; palsWith = null; dogWith = 0;
+    wipeTo(function () { go('card'); });
+  };
   // on a narrow screen the tab is just the book, so it clears the level's ribbon
   var bookBtn = function () { return { x: 3, y: 3, w: BB.W > 200 ? 36 : 15, h: 14 }; };
   var whereBtn = function () { return { x: 3, y: 19, w: BB.W > 200 ? 36 : 15, h: 14 }; };
@@ -6597,7 +6730,7 @@
   // the land's sticker at the start of its row: the golden bell
   var landEmblem = function () { return A.bell || A.starSmall; };
   var whereCells = function () {
-    var W = BB.W, out = [], rows = 0, NL = BB.LEVELS.length, cw = Math.min(17, (W - 34) / NL), x0 = W / 2 - (cw * NL) / 2 + 9;
+    var W = BB.W, out = [], rows = 0, NL = NL, cw = Math.min(17, (W - 34) / NL), x0 = W / 2 - (cw * NL) / 2 + 9;
     // (six lands open: the rows close up a little so the last clears the hint at the bottom)
     var lands = LAND_LAST.filter(function (l, i) { return landOpen(i); }).length, y0 = lands > 5 ? 22 : 26, dy = lands > 5 ? 17 : 21, ch = lands > 5 ? 14 : 15;
     for (var i = 0; i < LAND_LAST.length; i++) {
@@ -6677,6 +6810,8 @@
       var wi = WHO.indexOf(who());
       if (BB.hit('left')) { if (wi > 0) pick(WHO[wi - 1]); else turn(-1); }
       if (BB.hit('right')) { if (wi < WHO.length - 1) pick(WHO[wi + 1]); else turn(1); }
+    } else if (opg === 'advent' && save.advent === 0xffffff && (BB.hit('a') || (function () { var bd = bigDoor(); return tapIn(bd.x, bd.y, bd.w, bd.h + 16); })())) {
+      startBonus();
     } else if (/^outfits/.test(opg)) {
       var cells = outfitCells(opg), lo = cells[0].i, hi = cells[cells.length - 1].i;
       if (outfitAt < lo || outfitAt > hi) outfitAt = lo;
@@ -6698,7 +6833,7 @@
     UI.ribbon(ctx, W / 2, 1, PAGE_NAME[pg], PAGE_COL[pg]);
     if (pg === 'friends') {
       // Bear and Prince, a sticker for every level each came home from (a shape where they're still hiding)
-      var L = BB.LEVELS.length, cw = (W - 20) / L, gotB = 0, gotP = 0;
+      var L = NL, cw = (W - 20) / L, gotB = 0, gotP = 0;
       for (var i = 0; i < L; i++) {
         var cx = 10 + cw * i + cw / 2, fb = !!save.bears[i + 1], fp = !!save.princes[i + 1];
         if (fb) gotB++; if (fp) gotP++;
@@ -6734,7 +6869,21 @@
           BB.text(ctx, String(d + 1), ax + aw / 2, ay + 8, { color: '#ffffff', align: 'center', shadow: 'rgba(28,14,48,0.5)' });
         }
       }
-      BB.text(ctx, open + ' OF 24 DOORS OPEN', W / 2, 16, { color: INK, align: 'center' });
+      BB.text(ctx, open === 24 ? 'ALL 24 DOORS OPEN!' : open + ' OF 24 DOORS OPEN', W / 2, 16, { color: open === 24 ? PICK : INK, align: 'center' });
+      /* all 24 open: the big golden door in the middle, 25 — CHRISTMAS
+         DAY — tap it for the bonus level */
+      if (open === 24) {
+        var bd = bigDoor(), pulse = reduce ? 0 : Math.round(Math.sin(sceneT * 0.1) * 1);
+        UI.round(ctx, bd.x - 1 - pulse, bd.y - 1 - pulse, bd.w + 2 + pulse * 2, bd.h + 2 + pulse * 2, INK, 3);
+        UI.round(ctx, bd.x - pulse, bd.y - pulse, bd.w + pulse * 2, bd.h + pulse * 2, '#ffc830', 2.5);
+        UI.round(ctx, bd.x + 3, bd.y + 3, bd.w - 6, bd.h - 6, '#ffe470', 2);
+        ctx.fillStyle = '#d8283a'; ctx.fillRect(bd.x + bd.w / 2 - 1.5, bd.y, 3, bd.h); ctx.fillRect(bd.x, bd.y + bd.h / 2 - 1.5, bd.w, 3);
+        BB.icons.disc(ctx, bd.x + bd.w / 2 - 3, bd.y + 4, 2.6, '#d8283a'); BB.icons.disc(ctx, bd.x + bd.w / 2 + 3, bd.y + 4, 2.6, '#d8283a');
+        BB.text(ctx, '25', bd.x + bd.w / 2, bd.y + bd.h / 2 - 6, { color: '#ffffff', outline: '#8a5a10', align: 'center', scale: 2 });
+        if (!reduce && sceneT % 24 < 12) BB.draw(ctx, A.starSmall, bd.x + 3 + (Math.floor(sceneT / 24) * 13) % (bd.w - 8), bd.y + 3);
+        UI.paper(ctx, W / 2 - 42, bd.y + bd.h + 3, 84, 13, { stitch: false });
+        BB.text(ctx, blink() ? 'CHRISTMAS DAY!' : (BB.inputMode === 'touch' ? 'TAP TO OPEN!' : 'PRESS OK!'), W / 2, bd.y + bd.h + 6.5, { color: PICK, align: 'center' });
+      }
     } else {
       outfitCells(pg).forEach(function (c) {
         var i = c.i, o = OUTFITS[i], open = outfitOpen(o), worn = save.outfit === o.id, cx = c.x + c.w / 2, f = outfitSet(o, false).idle;
@@ -6769,14 +6918,14 @@
   var updateCard = function () {
     sceneT++;
     if (sceneT === 1) BB.music('');
-    if (!wipe && (sceneT > (cardQuick ? 60 : 110) || (sceneT > 25 && (BB.hit('a') || BB.hit('start') || BB.tap)))) { cardQuick = false; wipeTo(function () { startLevel(save.at, cardCheck); go('play'); }); }
+    if (!wipe && (sceneT > (cardQuick ? 60 : 110) || (sceneT > 25 && (BB.hit('a') || BB.hit('start') || BB.tap)))) { cardQuick = false; wipeTo(function () { startLevel(playN || save.at, cardCheck); go('play'); }); }
   };
   var drawCard = function (ctx) {
-    var W = BB.W, def = BB.LEVELS[save.at - 1], gfx = theme(def.theme), n = save.at;
+    var W = BB.W, n = playN || save.at, def = BB.LEVELS[n - 1], gfx = theme(def.theme);
     BB.drawBackdrop(ctx, gfx.bg, reduce ? 0 : sceneT * 0.3, 0, H);
     ctx.fillStyle = 'rgba(40,20,60,0.25)'; ctx.fillRect(0, 0, W, H);
     // the level's number on a big ribbon, its name on a paper tag
-    UI.ribbon(ctx, W / 2, 10, 'LEVEL ' + n, LEVEL_COL[n - 1], { scale: 2 });
+    UI.ribbon(ctx, W / 2, 10, levelLabel(n), LEVEL_COL[n - 1], { scale: 2 });
     var nw = BB.textW(def.name) + 14;
     UI.paper(ctx, W / 2 - nw / 2, 33, nw, 14, { stitch: false });
     BB.text(ctx, def.name, W / 2, 36.5, { color: INK, align: 'center' });
@@ -6812,7 +6961,7 @@
   var HINTS = [
     [['t', 'PULL THE CRACKERS!']], [['t', 'SHAKE THE SNOW GLOBE!']], [['t', 'FIRE THE NOON-DAY GUN!']], [['t', 'RIDE THE COWS!']],
     [['t', 'ON YOUR BIKE!']], [['t', 'THE TIDE IS GOING OUT!']], [['t', 'FIND THE TREASURE!']], [['t', 'SWITCH ON THE LIGHTS!']],
-    [['t', 'CATCH THE FERRY!']], [['t', 'STOMP GRABBY GUS!']], [['t', 'FLY THE SLEIGH!']]
+    [['t', 'CATCH THE FERRY!']], [['t', 'STOMP GRABBY GUS!']], [['t', 'FLY THE SLEIGH!']], [['t', 'MERRY CHRISTMAS!']]
   ];
 
   /* ---- pause ---- */
@@ -6830,7 +6979,7 @@
       sfx('select');
       if (pauseAt === 0) go('play');
       else if (pauseAt === 1) { save.power = G.p.power; store(); cardCheck = false; bearWith = 0; princeWith = 0; palsWith = null; dogWith = 0; wipeTo(function () { go('card'); }); }
-      else if (pauseAt === 2) { save.power = G.p.power; store(); wipeTo(function () { go('map'); mapEnter(); }); }
+      else if (pauseAt === 2) { save.power = G.p.power; store(); wipeTo(function () { playN = 0; go('map'); mapEnter(); }); }
       else if (pauseAt === 3) BB.setMute(!BB.muted());
       else openGrownups('pause');
     } else if (BB.hit('start')) go('play');
@@ -6856,7 +7005,12 @@
   var updateClear = function () {
     sceneT++;
     if (sceneT === 24 && BB.voice) BB.voice.play('welldone');
-    if (sceneT > 50 && (BB.hit('a') || BB.hit('start') || BB.tap || sceneT > 240)) wipeTo(function () { go('map'); mapEnter(G.n); });
+    if (sceneT > 50 && (BB.hit('a') || BB.hit('start') || BB.tap || sceneT > 240)) wipeTo(function () {
+      var bonus = G.def.bonus;
+      mapCheer = justCleared ? { n: justCleared, t: 0 } : null; justCleared = 0;
+      passTurn();
+      playN = 0; go('map'); mapEnter(bonus ? 0 : G.n);
+    });
   };
   var drawClear = function (ctx) {
     drawWorld(ctx);
@@ -6903,10 +7057,10 @@
   var princesHome = function () { var n = 0; for (var k in save.princes) if (save.princes[k]) n++; return n; };
   var catsHome = function () { return bearsHome() + princesHome(); };
   var creditLines = function () {
-    var cats = bearsHome(), prs = princesHome(), L = BB.LEVELS.length, b = '#ffe048';
+    var cats = bearsHome(), prs = princesHome(), L = NL, b = '#ffe048';
     var two = function (a, c) { return BB.W > 200 ? [[a + ' AND ' + c, '#ff94cc']] : [[a, '#ff94cc'], ['AND ' + c, '#ff94cc']]; };
     return [
-      ['MERRY CHRISTMAS!', b], ['THE REINDEER ARE HOME!', '#ffffff'], ['', ''], ['GRABBY GUS SAYS SORRY', '#e8ecf4'], ['(HE GOT SOME CHIPS)', '#9098b0'], ['', ''], ['', ''],
+      ['MERRY CHRISTMAS!', b], ['THE REINDEER ARE HOME!', '#ffffff'], ['', ''], ['GRABBY GUS SAYS SORRY', '#e8ecf4'], ['AND GOT A BELL', b], ['OF HIS OWN', b], ['(AND SOME CHIPS)', '#9098b0'], ['', ''], ['', ''],
       ['BONNIE BOUNCE', b], ['CHRISTMAS', '#ff6a6a'], ['', ''], ['STARRING', '#9098b0'], ['BONNIE', '#ffffff'], ['BEAU', '#ffffff'], ['WINNIE', '#ffffff'], ['', '']
     ].concat(two(nameOf('lucy'), nameOf('luke')), two(nameOf('grace'), nameOf('ollie')), [
       ['', ''], ['BEAR THE CAT', '#c9c7da'], [cats === L ? 'FOUND IN EVERY LEVEL!' : 'FOUND IN ' + cats + ' OF ' + L, '#9098b0'],
@@ -6976,6 +7130,19 @@
       // his bag of chips
       ctx.fillStyle = HAT_INK; ctx.fillRect(gx2 + 2, gy2 + 22, 7, 8); ctx.fillStyle = '#ffffff'; ctx.fillRect(gx2 + 2.5, gy2 + 22.5, 6, 7); ctx.fillStyle = '#e8343c'; ctx.fillRect(gx2 + 2.5, gy2 + 25, 6, 1.5);
       ctx.fillStyle = '#ffd23e'; ctx.fillRect(gx2 + 3, gy2 + 20.5, 1, 2.5); ctx.fillRect(gx2 + 5, gy2 + 20, 1, 3); ctx.fillRect(gx2 + 7, gy2 + 21, 1, 2);
+      /* and Father Christmas's present to him, dropped from the sleigh as
+         it goes over: a little golden bell of his own, on a red ribbon
+         round his neck (he only ever wanted something shiny) */
+      var nx2 = gx2 + gs.w * 0.42, ny2 = gy2 + gs.h * 0.42;
+      if (t >= 40 && t < 90) {
+        var gyF = 20 + (ny2 - 20) * Math.min(1, (t - 40) / 50), gc = GIFT_COL[0];
+        ctx.fillStyle = HAT_INK; ctx.fillRect(snap(nx2 - 3.5), snap(gyF - 3.5), 7, 7); ctx.fillStyle = gc[0]; ctx.fillRect(snap(nx2 - 3), snap(gyF - 3), 6, 6); ctx.fillStyle = gc[1]; ctx.fillRect(snap(nx2 - 0.5), snap(gyF - 3), 1, 6);
+      } else if (t >= 90) {
+        ctx.fillStyle = '#c8283a'; ctx.fillRect(snap(nx2 - 4), snap(ny2 - 1), 8, 1);
+        if (A.bell) BB.draw(ctx, A.bell, snap(nx2 - 2.7), snap(ny2), false, null, 0.6);
+        if (!reduce && t % 30 < 10) BB.draw(ctx, A.starSmall, snap(nx2 + 3), snap(ny2 - 2));
+        if (t < REUNION) BB.text(ctx, 'A BELL OF MY OWN!', Math.max(2, Math.min(W - 2 - BB.textW('A BELL OF MY OWN!'), gx2 + gs.w / 2 - BB.textW('A BELL OF MY OWN!') / 2)), 74, { color: '#ffe048', outline: dark });
+      }
     }
     endFx.forEach(function (f) { if (f.t < 36 || f.t % 2) { ctx.fillStyle = f.c; ctx.fillRect(Math.round(f.x), Math.round(f.y), 1.5, 1.5); } });
     if (!reduce) screenSnow(ctx, t, 20);
@@ -7119,8 +7286,11 @@
   BB.music(TITLE_SONG);
   // ?level=N goes straight into a level (for testing)
   var lv = /[?&]level=(\d+)/.exec(qs);
-  if (lv) { save.at = Math.max(1, Math.min(BB.LEVELS.length, +lv[1])); save.unlocked = Math.max(save.unlocked, save.at); go('card'); }
-  BB.game = { save: function () { return save; }, G: function () { return G; }, scene: function () { return scene; }, go: go, startLevel: startLevel, mapEnter: function (from) { mapEnter(from); }, theme: function (n) { return theme(n); } };
+  if (lv && +lv[1] > NL && BB.LEVELS[+lv[1] - 1]) { playN = +lv[1]; go('card'); }
+  else if (lv) { save.at = Math.max(1, Math.min(NL, +lv[1])); save.unlocked = Math.max(save.unlocked, save.at); go('card'); }
+  BB.game = { save: function () { return save; }, G: function () { return G; }, scene: function () { return scene; }, go: go, startLevel: startLevel, mapEnter: function (from) { mapEnter(from); }, theme: function (n) { return theme(n); },
+    // (for the tests: Father Christmas's cheer on the map, the map's walk, and the bonus level)
+    cheer: function () { return { cheer: mapCheer, walk: mapWalk, just: justCleared }; }, bonus: function () { startBonus(); } };
   /* For tools/overview.html: the whole of level n drawn flat, in strips
      `seg` pixels wide, every enemy and item shown where it starts. */
   BB.game.overview = function (n, seg) {

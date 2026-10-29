@@ -774,7 +774,7 @@
     build: function (L) {
       L.start = { x: 3, row: 12 };
       L.ground(0, 34, 12);
-      L.e('santa', 9, 12, { say: ['HO HO HO!', 'THE BELL IS BACK!', 'YOU FLY THE SLEIGH!', 'A PRESENT DOWN EVERY CHIMNEY!'] });
+      L.e('santa', 9, 12, { say: ['HO HO HO!', 'THE BELL IS BACK!', 'I HAVE AN IDEA FOR GUS!', 'YOU FLY THE SLEIGH!', 'A PRESENT DOWN EVERY CHIMNEY!'] });
       L.e('sleigh', 22, 12, { t: 2400, land: 238 });
       // the roofs of the Town, a chimney on each; the streets between them far below
       L.ground(40, 60, 13); L.ground(66, 90, 12); L.ground(96, 120, 13); L.ground(126, 150, 11);
@@ -811,6 +811,44 @@
       L.ground(426, 470, 14);
       L.semi(434, 440, 10); advent(L, 24, 437, 10);
       L.goal(444, 14);
+    }
+  });
+
+  /* The bonus — CHRISTMAS DAY. Behind the advent calendar's big last door,
+     once all 24 doors are open (game.js: the sticker book). Christmas
+     morning in the snow: Father Christmas waving you off, presents in
+     every block, a cracker every few steps (every joke), the whole of
+     Jingle Bells laid into the path, a sledge run, balloons, snowmen to
+     snowball, knock-knock doors with the family behind them, and the
+     cottage at the end. Nothing to find and no medals: just a treat. */
+  add({
+    name: 'CHRISTMAS DAY', theme: 'xmorning', alt: 'frosty', w: 250, seed: 2512, snow: 1, bonus: true,
+    build: function (L) {
+      L.ground(0, 250);
+      L.e('santa', 8, 16, { say: ['HO HO HO!', 'MERRY CHRISTMAS!', 'PRESENTS FOR EVERYONE!'] });
+      L.row(18, R1, '?P?L?');
+      cracker(L, 26);
+      L.e('robin', 30);
+      // the whole of Jingle Bells, laid into the path
+      L.notes(34, 16, 'EEE EEE EGCDE FFFFFEEEEDDED G EEE EEE EGCDE FFFFFEEEGGFDC');
+      L.arc(40, 11, 12); L.arc(62, 11, 12);
+      cracker(L, 96);
+      L.row(100, R1, 'S?M?S');
+      L.e('xsnowman', 108); L.e('xdoor', 114, 16, { give: 'stars' });
+      cracker(L, 120);
+      // balloons up to a row of stars
+      L.balloons(126, 14); L.coins(128, 7, 12);
+      L.e('robin', 140);
+      // up a terrace to the hilltop, and the sledge run down it
+      L.ground(137, 144, 13);
+      sledge(L, 150, 10, 22, 5);
+      cracker(L, 182);
+      L.e('xsnowman', 188); L.row(192, R1, 'P?L?P');
+      L.e('xdoor', 200, 16, { give: 'stars' });
+      L.spring(206); L.semi(210, 220, 10); L.coins(211, 9, 8);
+      cracker(L, 224);
+      L.arc(226, 11, 10);
+      L.goal(238);
     }
   });
 })();
