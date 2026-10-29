@@ -6123,6 +6123,12 @@
   var mapX = 0, mapY = 0, mapCam = 0, mapWalk = null, mapFace = 1, mapGoal = 0;
   var nodePos = function (i) { return BB.Map.node(i); };
   var mapSong = function () { return 'xmap'; };
+  // how many reindeer are back with the sleigh: one for each level finished where one was found
+  var reindeerHome = function () {
+    var n = 0;
+    BB.LEVELS.forEach(function (d, i) { if (d.found && d.found.who !== 'hat' && save.cleared.indexOf(i + 1) > -1) n++; });
+    return n;
+  };
   var mapW = function () { return BB.Map.width ? BB.Map.width() : BB.Map.widthFor(save.won); };
   var mapEnter = function (walkFrom) {
     var at = Math.max(1, Math.min(save.unlocked, save.at || 1));
