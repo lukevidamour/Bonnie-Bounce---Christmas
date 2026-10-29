@@ -5431,6 +5431,11 @@
     // hanging from a pterodactyl's feet: arms up
     if (p.carry && p.st === 'play') f = set.jump;
     var flip = p.face < 0 && p.st !== 'dead';
+    /* A little of each of them: left standing, Beau does keepy-ups with a
+       snowball (a kick, a bounce); Aunty Grace twirls when she cheers. */
+    var keepy = who() === 'beau' && p.st === 'play' && p.ground && (p.idleT || 0) > 80 && !p.mount && !G.def.bike;
+    if (keepy && (p.idleT % 36) < 6) f = set.run3;
+    if (who() === 'grace' && (p.st === 'cheer' || (p.st === 'arch' && p.ground)) && !reduce) flip = Math.floor(p.t / 9) % 2 === 1;
     var v = p.star ? A.bonnie.rainbow[(G.tick >> (p.star < STAR_WARN ? 3 : 2)) % 4] : (p.power === 2 && big ? A.bonnie.red : outfit().v);
     if (G.flash && (G.flash >> 2) % 2) v = A.bonnie.rainbow[2];
     /* squash and stretch: taller and thinner as he leaps, wider and
@@ -5501,6 +5506,11 @@
     // the light he is standing in catches his edge
     if (G.light) BB.catchLight(ctx, f, sx, sy, flip, v, G.light.at(p.x + p.w / 2, p.y + p.h * 0.4), fw, fh);
     drawHat(ctx, p.crown ? 'paper' : outfit().hat, sx, sy, fw, fh, f, flip);
+    if (keepy) {
+      var kph = (p.idleT % 36) / 36, kx = sx + fw / 2 + (flip ? -5 : 5), ky = sy + fh - 3 - Math.sin(kph * Math.PI) * 16;
+      BB.icons.disc(ctx, kx, ky, 2.2, '#1c1428'); BB.icons.disc(ctx, kx, ky, 1.7, '#f2f6ff'); ctx.fillStyle = '#ffffff'; ctx.fillRect(snap(kx - 1), snap(ky - 1), 0.5, 0.5);
+      if (p.idleT % 36 === 1 && !reduce) sfx('tick');
+    }
     if (p.lift) {
       // the bunch held up over his head, strings to his hand
       var hx = sx + fw / 2 + (flip ? -2 : 2), hy = sy + 6, sway = reduce ? 0 : Math.sin(G.tick * 0.08) * 1.2;
@@ -5673,6 +5683,7 @@
       if ((e.K.item && e.rise < e.h + 1) || (e.K.behind && !e.K.item)) e.K.draw(ctx, e);
     });
     drawTiles(ctx);
+    drawIce(ctx);
     drawGrowth(ctx);
     drawBlooms(ctx);
     G.ents.forEach(function (e) { if (e.alive && e.active && !e.K.item && !e.K.behind && !e.K.front && !e.enemy && e.K.draw) e.K.draw(ctx, e); });
@@ -5691,6 +5702,28 @@
     if (hud !== false && !BB.reel) drawHud(ctx);
   };
 
+  /* A frozen pond ({ ice: [[x0, x1], …] } in levelsx.js): a sheet of ice
+     over the ground there, pale blue and glassy, with a glint sliding
+     across it, so you can see where it'll be slippery. */
+  var drawIce = function (ctx) {
+    var zones = G.def.ice;
+    if (!zones) return;
+    var c = G.cam;
+    zones.forEach(function (z) {
+      for (var tx = Math.max(z[0], Math.floor(c.x / T) - 1); tx < Math.min(z[1], Math.floor((c.x + BB.W) / T) + 2); tx++) {
+        var ty = 0;
+        while (ty < G.h && !SOLID[tileAt(tx, ty)]) ty++;
+        if (ty >= G.h) continue;
+        var x = tx * T - snap(c.x), y = ty * T - snap(c.y);
+        ctx.fillStyle = '#a8d8f4'; ctx.fillRect(x, y - 1, T, 3);
+        ctx.fillStyle = '#e6f6ff'; ctx.fillRect(x, y - 1, T, 1);
+        ctx.fillStyle = 'rgba(120,180,230,0.6)'; ctx.fillRect(x, y + 2, T, 1);
+        // a glint sliding along
+        var gx = ((G.tick * (reduce ? 0 : 0.6) + tx * 13) % 40);
+        if (gx < T) { ctx.fillStyle = '#ffffff'; ctx.fillRect(x + gx, y, 2, 0.5); }
+      }
+    });
+  };
   /* Snow, once it's started (the snow globe in Candie Gardens): flakes
      drifting down in front of everything, the near ones bigger and
      quicker, swaying as they fall; heavier at midnight (G.snow 2). */
@@ -6169,13 +6202,14 @@
     // with the level's number and the stars found there
     var tot = levelTotal(n), best = Math.min(tot, (save.best && save.best[n]) || 0), sl = best + '/' + tot;
     UI.ribbon(ctx, W / 2, 3, def.name, LEVEL_COL[n - 1]);
-    // …and Bear's face: bright if he's come home from this level, a shadow if he's still hiding there
-    var tag = 'LEVEL ' + n, tw = BB.textW(tag) + 10 + BB.textW(sl) + 8 + 10 + 13, tx = W / 2 - tw / 2;
+    // …and Bear's and Prince's faces: bright if they've come home from this level, a shadow if they're still hiding there
+    var tag = 'LEVEL ' + n, tw = BB.textW(tag) + 10 + BB.textW(sl) + 8 + 10 + 23, tx = W / 2 - tw / 2;
     UI.paper(ctx, tx, 17, tw, 13, { stitch: false });
     BB.text(ctx, tag, tx + 5, 20, { color: INK });
-    BB.draw(ctx, A.starSmall, tx + tw - 13 - BB.textW(sl) - 14, 20);
-    BB.text(ctx, sl, tx + tw - 13 - BB.textW(sl) - 5, 20, { color: best >= tot ? PICK : INK });
-    BB.draw(ctx, A.bearHead, tx + tw - 13, 19.5, false, save.bears[n] ? null : A.bearDim);
+    BB.draw(ctx, A.starSmall, tx + tw - 23 - BB.textW(sl) - 14, 20);
+    BB.text(ctx, sl, tx + tw - 23 - BB.textW(sl) - 5, 20, { color: best >= tot ? PICK : INK });
+    BB.draw(ctx, A.bearHead, tx + tw - 23, 19.5, false, save.bears[n] ? null : A.bearDim);
+    if (A.princeHead) BB.draw(ctx, A.princeHead, tx + tw - 13, 19.5, false, save.princes[n] ? null : A.bearDim);
     // its medals, found and still hidden, just under the tag
     var nm = levelMedals(n);
     for (var mi = 0; mi < nm; mi++) medalIcon(ctx, W / 2 - (nm - 1) * 4 + mi * 8, 35, medalBits(n) & (1 << mi));
@@ -6596,6 +6630,7 @@
     var f = outfitSet(save.power === 2 ? null : outfit(), !!save.power).idle;
     var hop = reduce ? 0 : -Math.round(Math.abs(Math.sin(sceneT * 0.08)) * 2);
     if (save.bears[n]) { var bs = E.bear.sit[Math.floor(sceneT / 24) % 2]; BB.draw(ctx, bs, gx - 11, 100 - bs.h, true); }
+    if (save.princes[n] && E.prince) { var ps = E.prince.sit[Math.floor(sceneT / 26) % 2]; BB.draw(ctx, ps, gx - 24, 100 - ps.h, true); }
     if (outfit().cape) drawCape(ctx, gx + 7, 100 - f.h + hop + f.h * 0.36, f.h, 1, 0, sceneT, Array.isArray(outfit().cape) ? outfit().cape : null);
     BB.draw(ctx, f, gx + 8 - f.w / 2, 100 - f.h + hop, false, save.power === 2 ? A.bonnie.red : outfit().v);
     drawHat(ctx, outfit().hat, gx + 8 - f.w / 2, 100 - f.h + hop, f.w, f.h, f, false);
@@ -6668,13 +6703,16 @@
     drawWorld(ctx);
     UI.dim(ctx);
     var W = BB.W, bw = 126, bx = Math.round(W / 2 - bw / 2), tot = levelTotal(G.n), got = Math.min(tot, (G && G.got) || 0);
-    UI.paper(ctx, bx, 34, bw, 68);
-    UI.ribbon(ctx, W / 2, 27, 'LEVEL CLEAR!', '#e8a820');
-    // Bear: home with Bonnie, or still out there for next time
-    iconLine(ctx, A.bearHead, G.bearHome ? null : A.bearDim, G.bearHome ? 'BEAR CAME HOME!' : 'BEAR IS HIDING...', 74, G.bearHome ? PICK : UI.SOFT);
-    BB.text(ctx, 'WELL DONE BONNIE!', W / 2, 47, { color: INK, align: 'center' });
-    iconLine(ctx, A.star[reduce ? 0 : Math.floor(sceneT / 6) % 4], null, got + ' OF ' + tot + ' STARS', 61, got >= tot ? PICK : INK, -2);
-    if (sceneT > 50 && blink()) BB.prompt(ctx, BB.inputMode === 'touch' ? [['g', 'ok'], ['t', 'TAP']] : [['g', 'ok'], ['t', 'CONTINUE']], W / 2, 86, { align: 'center', color: INK, shadow: null });
+    var wd = 'WELL DONE ' + nameOf(who()) + '!';
+    bw = Math.max(bw, BB.textW(wd) + 16); bx = Math.round(W / 2 - bw / 2);
+    UI.paper(ctx, bx, 32, bw, 80);
+    UI.ribbon(ctx, W / 2, 25, 'LEVEL CLEAR!', '#e8a820');
+    BB.text(ctx, wd, W / 2, 44, { color: INK, align: 'center' });
+    iconLine(ctx, A.star[reduce ? 0 : Math.floor(sceneT / 6) % 4], null, got + ' OF ' + tot + ' STARS', 57, got >= tot ? PICK : INK, -2);
+    // Bear and Prince: home with you, or still out there for next time
+    iconLine(ctx, A.bearHead, G.bearHome ? null : A.bearDim, G.bearHome ? 'BEAR CAME HOME!' : 'BEAR IS HIDING...', 69, G.bearHome ? PICK : UI.SOFT);
+    if (A.princeHead) iconLine(ctx, A.princeHead, G.princeHome ? null : A.bearDim, G.princeHome ? 'PRINCE CAME HOME!' : 'PRINCE IS HIDING...', 80, G.princeHome ? PICK : UI.SOFT);
+    if (sceneT > 50 && blink()) BB.prompt(ctx, BB.inputMode === 'touch' ? [['g', 'ok'], ['t', 'TAP']] : [['g', 'ok'], ['t', 'CONTINUE']], W / 2, 96, { align: 'center', color: INK, shadow: null });
   };
   var updateOver = function () {
     sceneT++;

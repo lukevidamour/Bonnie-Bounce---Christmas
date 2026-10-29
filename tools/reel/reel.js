@@ -10,19 +10,13 @@
    serve.js. The game has no dice in its rules (only in sparkles), so the
    replay is the same run.
 
-   Luke and Lucy stay out of it: they're the checkpoints from level 21
-   on (taken away here), Dad at the start of the bike ride (taken away),
-   and the car at the end of levels 21–35 (no scene goes that far).
+   The family's cameos stay out of it where they'd crowd the shot.
 
      REEL.look(n, x)        one frame of level n at tile x, to choose spots
      REEL.plan(i)           find scene i's path (kept for film)
      REEL.film()            film every scene, then make the soundtrack
-   Scenes are cut to the song's bars: SONG's 16ths are 0.1s, so a bar is
-   96 frames and a beat 24.
-
-   ?reel=halfterm films the Half Term! trailer instead (23 Oct): ten
-   scenes from levels 46–55, under Pumpkin Town's waltz-march (twelve
-   0.1s steps to the bar: a bar is 72 frames).
+   Scenes are cut to the song's bars. (The Christmas edition's scenes are
+   a first draft: the trailer comes later, once Luke's approved it.)
    ========================================================================== */
 (function () {
   'use strict';
@@ -31,8 +25,7 @@
      autoplay, the first frame is the picture people see, so it must be
      play, not a dark screen; the sound only eases out over DECLICK
      seconds at the very end, so it stops without a click. */
-  var HALF = /[?&]reel=halfterm\b/.test(location.search);
-  var SONG = HALF ? 'pumpkintown' : 'hills', DECLICK = 0.03;
+  var SONG = BB.SONGS && BB.SONGS.xtitle ? 'xtitle' : 'hills', DECLICK = 0.03;
   var out = document.getElementById('out');
   var say = function (html) { var d = document.createElement('div'); d.innerHTML = html; out.appendChild(d); return d; };
   BB.reel = true;
@@ -105,57 +98,17 @@
      dog floats along behind from Pumpkin Town on. Mum and Dad are only at
      the checkpoints (taken away) and the house at each level's end (no
      scene goes that far), and the story isn't filmed. */
-  var HALFTERM = [
-    // down the pumpkin hill, into the leaf pile at its foot
-    { name: 'pumpkin patch: the leaf pile', n: 46, x: 84, frames: 144, outfit: 'wellies', beats: [by(BEAT.leaves, 70)], go: 118 },
-    // (up on the owl, and off along the branches at the top)
-    { name: 'conker woods: the owl', n: 47, x: 108, frames: 144, beats: [by(BEAT.owl, 110)], go: 132, gy: 4 },
-    { name: 'windy hill: the kite', n: 48, x: 96, frames: 144, outfit: 'wellies', beats: [by(BEAT.kite, 50)], then: 'stay' },
-    { name: 'trick or treat: a door', n: 49, x: 152, frames: 144, outfit: 'pumpkin', beats: [by(BEAT.knock, 80)], go: 172 },
-    { name: 'pumpkin town: the curly hill', n: 50, x: 64, frames: 144, beats: [by(BEAT.curl, 136)], go: 100 },
-    { name: 'graveyard: a hitchhiker', n: 51, x: 34, frames: 144, outfit: 'skeleton', beats: [by(BEAT.hitch, 50)], go: 62 },
-    // (on the stretching room's floor from the start, standing, as it sinks)
-    { name: 'the mansion: the stretching room', n: 52, x: 3, row: 8, frames: 144, pre: 0, then: 'stay',
-      prep: function (G) { var p = G.p; p.x = 21.5 * T; p.y = 8 * T - p.h; G.safe = { x: p.x, y: p.y }; G.cam.x = 0; } },
-    { name: "the witch's wood: the broomstick", n: 53, x: 214, frames: 144, outfit: 'witch', beats: [by(BEAT.broom, 70)], go: 300 },
-    { name: 'firework night: a rocket', n: 54, x: 30, frames: 144, beats: [by(BEAT.rocket, 110)], then: 'stay' },
-    /* the Witch, staged: down dizzy on her kitchen floor just ahead of him,
-       one stomp from saying sorry — then the giant pumpkin floats down */
-    { name: 'the witch', n: 55, x: 120, frames: 216, pre: 0, beats: [by(BEAT.witch, 80), by(BEAT.pumpkin, 150)], then: 'stay', budget: 300000,
-      prep2: function (G) {
-        var w = near(G, 'witch', G.p.x), p = G.p;
-        G.bossOn = true; w.active = true; w.st = 'dizzy'; w.t2 = 0; w.hp = 2; w.x = p.x + 34; w.y = 13 * T - w.h; w.vy = 0;
-      } }
-  ];
-  var SCENES = R.SCENES = HALF ? HALFTERM : [
-    { name: 'cloud kingdom', n: 8, x: 92, frames: 144 },
-    { name: 'coral reef, swimming', n: 4, x: 100, frames: 96, go: 124, gy: 5, style: { jump: 6, short: 6 } },
-    { name: 'sunset harbour: Bear', n: 11, x: 124, frames: 216, outfit: 'pirate', beats: [by(BEAT.bear, 100)] },
-    // (from the moment he lands on the first block: then it's all a walk along them)
-    { name: 'moon garden: the musical blocks', n: 18, x: 268, pre: 72, frames: 72, go: 284, outfit: 'pyjamas', style: { walk: 0, run: 4 } },
-    // (from the ledge by the gap in front of the wall; the room's a dead end, so he stays to enjoy it)
-    { name: 'frosty peaks: a secret room and its medal', n: 7, x: 219, pre: 0, frames: 120, outfit: 'super', beats: [by(BEAT.secret, 85), by(BEAT.medal, 112)], then: 'stay',
-      prep: function (G) { G.secretX = 225 * T; } },
-    { name: 'paris rooftops: up the steam', n: 26, x: 130, frames: 144, beats: [by(BEAT.steam, 100)] },
-    { name: "o'gliss: the slides", n: 31, x: 54, frames: 96 },
-    // (on the sand until he hops onto the board, which waits at its edge — the beach ends at
-    // tile 33 — and from then on, on the board or in the air over it: anything else is a wipeout)
-    { name: 'hossegor: surfing', n: 32, x: 24, frames: 144, beats: [by(BEAT.surf, 50)],
-      keep: function (G, st) { var p = G.p, board = !!(p.on && p.on.surf); return st < 1 ? board || p.x + p.w <= 34 * T : board || !p.ground; } },
-    { name: 'the bike ride: the musical bridge', n: 33, x: 98, frames: 168 },
-    // (running along the grass straight onto it: no hops on the way)
-    { name: 'puy du fou: the catapult', n: 34, x: 119, pre: 0, frames: 96, beats: [by(BEAT.fling, 60)] },
-    /* Rascal, staged so it all happens in one shot: he's just past Bonnie,
-       running off with Brocco; at frame 40 he turns and lobs a baguette
-       back, right at Bonnie (t2 140, from 65px: a baguette's reach), then
-       at frame 111 takes his great leap back (t2 211) and lands dizzy, for
-       Bonnie to run over and stomp (game.js, KINDS.fox) */
-    { name: 'rascal', n: 30, x: 273, frames: 192, pre: 12, outfit: 'football', fine: true, beats: [by(BEAT.dodge, 110), by(BEAT.fox, 170)], then: 'stay',
-      style: { wait: 0.3, left: 10, turn: 10, walk: 1 }, budget: 400000,
-      prep2: function (G) { var f = near(G, 'fox', G.p.x); f.x = G.p.x + 24; f.vx = 1.1 * 0.94; f.face = 1; f.t2 = 100; f.throwT = 0; G.reelX0 = G.p.x; },
-      // (he stands his ground until the baguette's jumped: it's thrown at him, and he hops it as it lands)
-      keep: function (G, st) { return st >= 1 || Math.abs(G.p.x - G.reelX0) <= 3; } },
-    { name: 'saint-malo: balloons', n: 35, x: 196, frames: 240, beats: [by(BEAT.balloons, 70)] }
+  /* The Christmas edition's scenes: a first draft, not filmed yet (the
+     brief: a short trailer later, hard cuts, no words, nothing Luke
+     hasn't approved). One moment of wonder from each of a few levels. */
+  var SCENES = R.SCENES = [
+    { name: 'harbour lights: the first cracker', n: 1, x: 28, frames: 144 },
+    { name: 'frosty morning: the sledge', n: 2, x: 184, frames: 192 },
+    { name: 'the noon-day gun', n: 3, x: 132, frames: 192 },
+    { name: "the green lanes: the cows' choir", n: 4, x: 96, frames: 144 },
+    { name: 'saumarez park: the bridge of lights', n: 5, x: 112, frames: 144 },
+    { name: 'sunset bays: Bear', n: 6, x: 224, frames: 216, beats: [by(BEAT.bear, 150)] },
+    { name: 'over the rooftops: the sleigh', n: 11, x: 16, frames: 288 }
   ];
 
   /* ---- copying the world (as the playtest robot does) ---------------------------- */
