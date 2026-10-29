@@ -28,8 +28,8 @@
   /* one design, drawn on a 64-pixel grid and scaled up whole, so every
      size stays crisp pixel art: Christmas Eve — a deep blue night sky,
      falling snow, a big moon, a snowy hill with a little fir — and Bonnie
-     close up in a Santa hat, cheering (an icon is seen at thumbnail size,
-     so his face fills it) */
+     with Beau and Winnie, close up in Santa hats (an icon is seen at
+     thumbnail size, so their faces fill it) */
   var paintIcon = function (size) {
     var c = document.createElement('canvas'); c.width = c.height = size;
     var g = c.getContext('2d'), u = size / 64;
@@ -54,22 +54,30 @@
       if (x % 7 === 3) px(x, top + 3, 1, 1, '#ffffff');
       px(x, top + 8, 1, 64 - top - 8, '#c4d4ec');
     }
-    // Bonnie, cheering, from the game's own sprite: scaled so his head
-    // fills the icon, and his shoulders run off the bottom edge
-    var P = A.bonnie, s = P.b.cheer || P.b.idle, sc = 2.7;
-    var sp = BB.surface(s.w + 2, s.h + 2); BB.draw(sp.getContext('2d'), s, 1, 1);
-    var w = (s.w + 2) * sc, h = (s.h + 2) * sc, x0 = 32 - w / 2 + 1, y0 = 5;
-    g.drawImage(sp, Math.round(x0 * u), Math.round(y0 * u), Math.round(w * u), Math.round(h * u));
-    // his Santa hat, as the game draws it (game.js drawHat) — centred 10.75 in
-    // from the sprite's left, on the top of his hair at 0.6 — scaled with him
-    var cx = x0 + (1 + 10.75) * sc, ty = y0 + 2 * sc, k2 = sc * 0.82;
-    for (var i = 0; i < 8; i += 0.25) {
-      var hw = Math.max(0.6, 6 - i * 0.68) * k2, flop = -(i > 4 ? (i - 4) * (i - 4) * 0.42 : 0) * k2, yy = ty + (3.5 - i + (i > 5 ? (i - 5) * 0.55 : 0)) * k2;
-      px(cx - hw + flop - 1, yy - 1, hw * 2 + 2, k2 * 0.25 + 1, '#2a1640');
-      px(cx - hw + flop, yy, hw * 2, k2 * 0.25 + 0.5, i < 2 ? '#e8343c' : (Math.floor(i * 2) % 3 < 1 ? '#b81c2a' : '#e8343c'));
-    }
-    disc(Math.round(cx - 7.6 * k2), Math.round(ty), Math.round(1.9 * k2), '#2a1640'); disc(Math.round(cx - 7.6 * k2), Math.round(ty), Math.round(1.45 * k2), '#ffffff');
-    px(cx - 7 * k2, ty + 3 * k2, 14 * k2, 3 * k2, '#2a1640'); px(cx - 6.5 * k2, ty + 3.4 * k2, 13 * k2, 2.1 * k2, '#ffffff'); px(cx - 6.5 * k2, ty + 5 * k2, 13 * k2, 0.5 * k2, '#dde2f2');
+    /* The three boys, close up, in Santa hats (Luke asked for all three, 29
+       Oct): Beau in the middle, a little behind and taller (he's eight),
+       Bonnie on the left and Winnie on the right, all from the game's own
+       sprites, their shoulders running off the bottom edge */
+    var kid = function (who, hx, y0, sc, fd) {
+      fd = fd || 1;
+      var s = A.player(who).b.idle, sp = BB.surface(s.w + 2, s.h + 2);
+      BB.draw(sp.getContext('2d'), s, 1, 1);
+      var x0 = hx - (1 + 10.75) * sc;
+      g.drawImage(sp, Math.round(x0 * u), Math.round(y0 * u), Math.round((s.w + 2) * sc * u), Math.round((s.h + 2) * sc * u));
+      // a Santa hat, as the game draws one (game.js drawHat), scaled with him
+      var cx = hx, ty = y0 + 2 * sc, k2 = sc * 0.82;
+      for (var i = 0; i < 8; i += 0.25) {
+        var hw = Math.max(0.6, 6 - i * 0.68) * k2, flop = -fd * (i > 4 ? (i - 4) * (i - 4) * 0.42 : 0) * k2, yy = ty + (3.5 - i + (i > 5 ? (i - 5) * 0.55 : 0)) * k2;
+        px(cx - hw + flop - 0.6, yy - 0.6, hw * 2 + 1.2, k2 * 0.25 + 0.6, '#2a1640');
+        px(cx - hw + flop, yy, hw * 2, k2 * 0.25 + 0.3, i < 2 ? '#e8343c' : (Math.floor(i * 2) % 3 < 1 ? '#b81c2a' : '#e8343c'));
+      }
+      disc(Math.round(cx - fd * 7.6 * k2), Math.round(ty), Math.max(2, Math.round(1.9 * k2)), '#2a1640'); disc(Math.round(cx - fd * 7.6 * k2), Math.round(ty), Math.max(1, Math.round(1.45 * k2)), '#ffffff');
+      px(cx - 7 * k2, ty + 3 * k2, 14 * k2, 3 * k2, '#2a1640'); px(cx - 6.5 * k2, ty + 3.4 * k2, 13 * k2, 2.1 * k2, '#ffffff'); px(cx - 6.5 * k2, ty + 5 * k2, 13 * k2, 0.5 * k2, '#dde2f2');
+    };
+    kid('beau', 32, 9, 1.7);
+    kid('bonnie', 14.5, 17, 1.7);
+    // (Winnie's hat flops the other way, so its bobble doesn't land on Beau's nose)
+    kid('winnie', 49.5, 17.5, 1.7, -1);
     return c;
   };
   [512, 192, 180].forEach(function (n) {
