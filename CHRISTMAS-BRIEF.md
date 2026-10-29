@@ -191,3 +191,26 @@ Match or beat the original's Half Term! land (levels 46–55 in the original:
 - When it's done, a short trailer can come later (the original has
   `tools/reel`). Keep it clean: no text on screen, hard cuts, and nothing
   he hasn't approved.
+
+## Luke's answers (29 Oct)
+
+- **Beau**, 8, he/him: long wavy dark-blond hair past his shoulders,
+  lighter at the ends, blue eyes, rosy cheeks, a gap-toothed grin; a royal
+  blue zip tracksuit with white stripes down the arms and legs.
+- **Winnie**, 5, he/him: a blond bob, blue eyes, very rosy cheeks, a
+  gap-toothed grin, double thumbs up; a black bomber jacket with red and
+  white striped cuffs and collar.
+- **Uncle Ollie**, he/him: shoulder-length wavy blond hair, a full blond
+  beard, blue eyes, a big smile; a pale grey suit and a white shirt.
+- **Aunty Grace**, she/her: long dark curly hair, half up, red lipstick,
+  a big smile; a pink and red patterned dress with puffed sleeves and a
+  sparkly necklace.
+- **Prince**, Beau and Winnie's cat: white, with a black cap over his ears
+  and round his eyes, a white stripe down his nose and a pink nose.
+- No club badges or brand logos from the photos (the tracksuit's coaching
+  badge, the football club): no licensed IP. Their colours are fine.
+- Story: Father Christmas needs help. All the brief's Guernsey places are
+  good. Yes to the Town's lights coming on and to the Boxing Day dip.
+- Luke: "Make it crazy fun, so the boys are smiling and laughing as they
+  play. Attention to detail in everything, even the map. I want the boys
+  to LOVE it." Then QA it thoroughly.
