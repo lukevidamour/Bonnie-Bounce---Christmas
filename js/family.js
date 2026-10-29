@@ -254,11 +254,11 @@
   };
 
   /* ---- Lucy -----------------------------------------------------------------
-     From the portrait and the Disney day: straight mid-brown hair past her
+     From the portrait and the theme-park day: straight mid-brown hair past her
      shoulders, parted in the middle; big black rectangular glasses; small
      gold hoops; a warm smile. Her oversized pink tee, black cycling shorts,
      white socks, and her trainers — black with white soles, as in the
-     Disney photo (z, Z and x below, if they should be white). */
+     theme-park photo (z, Z and x below, if they should be white). */
   (function () {
     var cx = 26, cy = 16.5, HAIR = '12345';
     var pal = merge(SKIN, EYES, {
@@ -371,7 +371,7 @@
   })();
 
   /* ---- Luke -----------------------------------------------------------------
-     From the portrait and the Disney day: tight ginger-brown curls in a
+     From the portrait and the theme-park day: tight ginger-brown curls in a
      curly crop (the volume on top, a loose fringe tumbling forward, short
      and close at the back and sides), a full ginger moustache and no
      beard, fair skin, a warm smile and a small silver hoop in his ear; the

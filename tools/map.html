@@ -1,0 +1,83 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Bonnie Bounce Christmas — map</title>
+<style>
+  body { margin: 0; background: #1a1626; color: #fff; font: 12px system-ui; padding: 10px; }
+  #screen, #pad { display: none; }
+  #map { image-rendering: pixelated; display: block; }
+  #info { opacity: .7; margin: 0 0 6px; }
+</style>
+</head>
+<body>
+<!-- A dev tool: the Christmas map drawn at any point in the story, so it
+     can be checked without playing to it. Open via the preview server:
+     /tools/map.html?at=5&cleared=1,2,3,4&reindeer=4&done=0&cam=0&t=100
+       at        the level he's standing at (1–11)
+       cleared   the levels finished (also sets what's open, unless &unlocked=)
+       reindeer  how many are back with the sleigh (0–8; worked out from
+                 cleared when left out)
+       done      1: the whole game won — Christmas morning
+       cam       the camera's left edge, in map pixels; &w= the screen's width
+                 (192, an iPad held sideways, unless given)
+       t         the frame to draw (the animations' clock); &reduce=1 for
+                 reduced motion
+       x,y       put him somewhere between the medallions (&walk=1: walking,
+                 &face=-1 to face left)
+       all       1: the whole map's width, not one screen
+       z         zoom (3 unless given)
+       save      a name: also saves the picture to tools/reel/out/name.png,
+                 when served by tools/reel/serve.js (&sz=3 saves it three
+                 times bigger, pixel for pixel) -->
+<canvas id="screen" width="160" height="144"></canvas>
+<div id="pad"><div data-dpad></div></div>
+<div id="info"></div>
+<canvas id="map"></canvas>
+<script src="../js/core.js"></script>
+<script src="../js/art.js"></script>
+<script src="../js/creatures.js"></script>
+<script src="../js/family.js"></script>
+<script src="../js/map.js"></script>
+<script>
+  var A = BB.ART, q = location.search, H = BB.H, R = BB.R;
+  var arg = function (k, d) { var m = new RegExp('[?&]' + k + '=([^&]*)').exec(q); return m ? decodeURIComponent(m[1]) : d; };
+  var cleared = arg('cleared', '').split(',').filter(Boolean).map(Number);
+  var at = +arg('at', cleared.length ? Math.min(11, Math.max.apply(null, cleared) + 1) : 1);
+  var done = arg('done', '0') === '1';
+  // the reindeer come home from levels 1–4 and 6–9 (5 finds the hat, 10 the bell)
+  var rd = arg('reindeer', null);
+  var reindeer = rd === null ? [1, 2, 3, 4, 6, 7, 8, 9].filter(function (n) { return cleared.indexOf(n) > -1; }).length : +rd;
+  var unlocked = +arg('unlocked', Math.min(11, Math.max(at, cleared.length ? Math.max.apply(null, cleared) + 1 : 1)));
+  var all = arg('all', '0') === '1', z = +arg('z', 3), t = +arg('t', 100);
+  var MW = BB.Map.width(), W = all ? MW : +arg('w', 192);
+  var p = BB.Map.node(at - 1), bx = +arg('x', p.x), by = +arg('y', p.y);
+  var cam = arg('cam', null);
+  cam = cam === null ? Math.max(0, Math.min(MW - W, bx - W / 2)) : +cam;
+  if (all) cam = 0;
+  BB.W = W;
+  var cv = document.getElementById('map'), g = cv.getContext('2d');
+  cv.width = W * R; cv.height = H * R;
+  cv.style.width = W * z + 'px'; cv.style.height = H * z + 'px';
+  g.setTransform(R, 0, 0, R, 0, 0); g.imageSmoothingEnabled = false;
+  var t0 = performance.now();
+  BB.Map.draw(g, {
+    t: t, reduce: arg('reduce', '0') === '1', camX: cam, at: at, unlocked: unlocked, cleared: cleared, done: done,
+    bonnie: { x: bx, y: by }, walking: arg('walk', '0') === '1', facing: +arg('face', 1), set: A.bonnie.s, v: null, power: 1, hat: null, reindeer: reindeer
+  });
+  var t1 = performance.now();
+  // (a second frame, to see what a frame costs once the island's painted)
+  var t2 = performance.now();
+  BB.Map.draw(g, {
+    t: t, reduce: arg('reduce', '0') === '1', camX: cam, at: at, unlocked: unlocked, cleared: cleared, done: done,
+    bonnie: { x: bx, y: by }, walking: arg('walk', '0') === '1', facing: +arg('face', 1), set: A.bonnie.s, v: null, power: 1, hat: null, reindeer: reindeer
+  });
+  var t3 = performance.now();
+  document.getElementById('info').textContent = 'map ' + MW + 'px wide · at ' + at + ' · cleared [' + cleared + '] · reindeer ' + reindeer + (done ? ' · DONE' : '') + ' · first draw ' + Math.round(t1 - t0) + 'ms, next ' + (t3 - t2).toFixed(1) + 'ms';
+  // (saved magnified by &sz=, 1 unless given, so the pixels can be looked at)
+  var save = arg('save', null), sz = +arg('sz', 1), out = cv;
+  if (sz > 1) { out = document.createElement('canvas'); out.width = cv.width * sz; out.height = cv.height * sz; var og = out.getContext('2d'); og.imageSmoothingEnabled = false; og.drawImage(cv, 0, 0, out.width, out.height); }
+  if (save) out.toBlob(function (b) { fetch('/reel/frame?i=' + save, { method: 'POST', body: b }).then(function () { document.title = 'saved ' + save; }); });
+</script>
+</body>
+</html>

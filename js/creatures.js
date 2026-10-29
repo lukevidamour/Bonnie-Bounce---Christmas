@@ -325,8 +325,8 @@
 
   /* Prince: Beau and Winnie's cat (Christmas, from Luke's photo, 29 Oct).
      White, with a black cap over his ears and round his eyes, a white
-     stripe down the middle of his forehead to his nose, a pink nose, a
-     black patch on his back and a black tail; green eyes. Drawn on Bear's
+     stripe down the middle of his forehead to his nose, a pink nose, and
+     all white everywhere else, back and tail too; green eyes. Drawn on Bear's
      own shapes and poses, his coat painted on afterwards: wherever the
      marking is, each of Bear's grey tones becomes the black of the same
      brightness, and everywhere else the white. */
@@ -341,10 +341,9 @@
           if (Math.abs(X - hx + 0.6) < 0.9 + Math.max(0, Y - (hy - 5)) * 0.32) return false;
           return Y < hy + 0.4 || Math.abs(X - hx) > 2.6;
         }
-        if (Y < hy - 4) return true;
-        // the patch on his back, and his tail
-        if (walk) return Math.hypot((X - 15.5) / 5, (Y - 10.5) / 3) < 1 || (X > 20 && Y < 13);
-        return Math.hypot((X - 17.5) / 3.4, (Y - 12) / 4) < 1 || (X > 19 && Y < 18.5);
+        // (his back, tummy and tail are white: Luke, 29 Oct, "his back is
+        // pretty much all white in real life")
+        return Y < hy - 4 && Math.abs(X - hx) < 7;
       };
     };
     var coat = function (sp, mark) {

@@ -602,7 +602,7 @@
   };
   var P = A.bonnie = frameSet(BON);
   /* A set of every frame, built again with a pattern on the jumper: the
-     PSG kit's stripe (Liverpool's all-red kit is colours alone) — or as
+     football kit's stripe down the middle — or as
      the skeleton onesie, its bones printed on. */
   var kitSet = function (kit, ch) {
     KIT = kit;
@@ -814,7 +814,7 @@
   })();
 
   /* ---- Dad -----------------------------------------------------------------
-     Luke, from the photos (the studio portrait and the Disney day): tight
+     Luke, from the photos (the studio portrait and the theme-park day): tight
      ginger-brown curls cut in a curly crop, a full ginger moustache and
      no beard, fair skin, a warm smile and a small silver hoop in his ear;
      the cream shirt with bold black squiggles, open at the neck; denim
@@ -2410,7 +2410,7 @@
       semi: 'girder', spal: ['#c49a78', '#94704e', '#644630', '#2a1c12'], column: 'funnel',
       deco: ['lantern', 'flagpost', 'lantern'], bg: 'tower', music: 'tower'
     },
-    // 29 · Disneyland Paris: pink paths, a fairytale castle, carousel and teacups
+    // 29 · the theme park: pink paths, a fairytale castle, carousel and teacups
     magic: {
       sky: ['#86ccff', '#bce4ff', '#ffe8f4'], ground: 'stone', gpal: ['#ffeef4', '#f8c4d4', '#c88ca2', '#6a4054'],
       brick: ['#ffdcea', '#f8a4c8', '#c86c98', '#5a2448'], hard: ['#e4f2ff', '#acd2f2', '#6a9aca', '#2c4a78'],

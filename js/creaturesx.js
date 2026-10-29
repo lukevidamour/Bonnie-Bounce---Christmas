@@ -686,6 +686,32 @@
     ]);
   });
 
+  /* The big Christmas tree for Christmas morning (the ending): a fir in
+     three tiers, tinsel looping round it, baubles, a gold star on top, in
+     a red pot; two frames, its lights twinkling. */
+  var TREE_BAUBLE = ['x', 'C', 'w', 'M', 'r'];
+  var bigTree = function (k) {
+    var tiers = [[24, 12, 20, 36], [24, 28, 26, 54], [24, 44, 32, 74]], parts = [
+      P('v', rrect(14, 74, 34, 86, 2), orb(20, 76, 12, 8, RED), 'u'),
+      P('T', rrect(21, 68, 27, 76, 1), null, 'S')
+    ];
+    tiers.slice().reverse().forEach(function (q) {
+      parts.push(P(HOLLY[2], tri(q[0] - q[2] / 2 - 4, q[3], q[0] + q[2] / 2 + 4, q[3], q[0], q[1] - 8), function (x, y) {
+        var X = x + 0.5, Y = y + 0.5, t = (X - q[0]) * 0.5 + (Y - q[1]) * 0.18 < 3 ? HOLLY[3] : HOLLY[2];
+        if (X > q[0] + (Y - q[1]) * 0.4) t = HOLLY[1];
+        // the tinsel, looping down across the tier
+        if (Math.abs(Y - (q[1] + (q[3] - q[1]) * 0.55 + (X - q[0]) * 0.32)) < 0.8) return GOLD[(Math.floor(X / 2) + k) % 2 ? 3 : 2];
+        // the lights and baubles
+        var h = hash(Math.floor(X / 3), Math.floor(Y / 3), 9);
+        if (h < 0.07) return TREE_BAUBLE[Math.floor(h * 70 + k) % TREE_BAUBLE.length];
+        return t;
+      }, HOLLY[0]));
+    });
+    parts.push(P(GOLD[3], or(tri(24, 0, 21, 6, 27, 6), tri(18, 4, 30, 4, 24, 9), tri(20, 11, 24, 6, 22, 5), tri(28, 11, 24, 6, 26, 5)), orb(23, 4, 6, 6, GOLD), GOLD[1]));
+    return build(48, 88, parts);
+  };
+  D.xtree = [bigTree(0), bigTree(1)];
+
   // for the sprite sheet: tools/sheet.html?only=xmas
   (A.sheet = A.sheet || []).push(['xmas things', [
     ['sleigh', A.sleigh], ['cracker', A.cracker[0]], ['', A.cracker[1]], ['globe', A.snowglobe[0]], ['', A.snowglobe[1]],

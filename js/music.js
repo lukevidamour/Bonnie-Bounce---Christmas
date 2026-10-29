@@ -502,7 +502,7 @@
         { noise: 1, vol: 0.013, notes: j(r('x . x . X . x . x . x . X . x .', 6), 'x . x . X . x . x . x . X . X X', 'X . . . X . . . X . X . X X X X') }
       ]
     },
-    // Disneyland Paris: the happiest tune in the game, a parade in D. The
+    // the theme park: the happiest tune in the game, a parade in D. The
     // tune drops down the chord and races back up, then calls out like a
     // fanfare; the bass marches, the drum rattles, and the thin voice
     // sparkles all the way

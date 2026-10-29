@@ -5,7 +5,7 @@
    witch's tower), the Witch herself, her potions and the frog they turn
    you into, and THE BIGGEST PUMPKIN EVER.
 
-   Spooky-cute, never scary (Luke, 23 Oct: "fun halloween … the Disney
+   Spooky-cute, never scary (Luke, 23 Oct: "fun halloween … the haunted-house
    Haunted Mansion / Nightmare Before Christmas vibe"): every skull grins
    with a sparkle in its eye holes, every ghost has rosy cheeks, the
    pumpkins are mischievous rather than menacing, the Witch is cross and
