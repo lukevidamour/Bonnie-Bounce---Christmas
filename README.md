@@ -307,3 +307,20 @@ the test:
 - **Bear:** `&bear=1`
 - **Prince:** `&prince=1`
 - **stuck hunt:** `&stuck=1`
+
+Last full run, 29 Oct:
+
+- **Finish:** all 11 levels, with one heart and never hit. Every flag
+  restarts cleanly. Gus is beaten by the robot itself.
+- **Medals:** all 33 reachable. Three were out of reach and fixed: the
+  postbox's sky route in level 4, the chimney-smoke ledge in level 8, and
+  the seal in level 6, whose bob was broken so he couldn't be bounced on.
+- **Bear:** found in all 11.
+- **Prince:** found in all 11.
+- **Stuck hunt:** nowhere to get stuck in any level. It found one place,
+  at the foot of Candie's sledge hill in level 2: walk down instead of
+  riding and there was a gap too wide to jump. The hills now run all the
+  way to the ground. Level 10's hunt stops at Gus's gate, as the
+  original's did at its bosses.
+- **Touch:** checked at iPad size (1024×768) with `?touch`: the level,
+  the sticker book and the map.
