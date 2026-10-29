@@ -1,0 +1,39 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Bonnie Bounce — a closer look</title>
+<style>body { margin: 0; background: #7fb8e8; } canvas#screen { display: none; } #out { image-rendering: pixelated; }</style>
+</head>
+<body>
+<!-- A dev tool: a few players' frames side by side, big, to check a face
+     or an outfit closely. /tools/look.html?who=winnie,ollie&k=idle,cheer
+     (&z= zoom, default 8; &s=1 for the small frames; &save=name saves it
+     to tools/reel/out/ when served by tools/reel/serve.js). -->
+<canvas id="screen" width="160" height="144"></canvas>
+<canvas id="out"></canvas>
+<script src="../js/core.js"></script>
+<script src="../js/art.js"></script>
+<script src="../js/creatures.js"></script>
+<script src="../js/family.js"></script>
+<script>
+  var q = function (k, d) { var m = new RegExp('[?&]' + k + '=([^&]+)').exec(location.search); return m ? decodeURIComponent(m[1]) : d; };
+  var A = BB.ART, Z = +q('z', 8), who = q('who', 'bonnie,beau,winnie,ollie,grace,lucy,luke').split(','), ks = q('k', 'idle,cheer').split(','), sz = q('s', '') ? 's' : 'b';
+  var items = [];
+  who.forEach(function (w) {
+    ks.forEach(function (k) {
+      if (k === 'cameo') { if (A.family[w]) items.push(A.family[w].idle); return; }
+      if (k === 'wave' || k === 'ccheer') { if (A.family[w]) items.push(k === 'wave' ? A.family[w].wave[0] : A.family[w].cheer); return; }
+      var P = A.player(w); if (P[sz][k]) items.push(P[sz][k]);
+    });
+  });
+  var W = items.reduce(function (a, s) { return a + s.w + 3; }, 3), H = items.reduce(function (a, s) { return Math.max(a, s.h); }, 0) + 6;
+  var cv = document.getElementById('out'), g = cv.getContext('2d');
+  cv.width = W * Z; cv.height = H * Z; g.imageSmoothingEnabled = false;
+  g.fillStyle = '#7fb8e8'; g.fillRect(0, 0, cv.width, cv.height);
+  var x = 3; items.forEach(function (s) { BB.draw(g, s, x * Z, (H - 3 - s.h) * Z, false, null, Z); x += s.w + 3; });
+  var save = q('save', '');
+  if (save) cv.toBlob(function (b) { fetch('/reel/frame?i=' + save, { method: 'POST', body: b }).then(function () { document.title = 'saved ' + save; }); });
+</script>
+</body>
+</html>

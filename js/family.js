@@ -95,7 +95,7 @@
     var parts = [];
     B.legs.forEach(function (L) {
       var hip = L[0], knee = L[1], foot = L[2];
-      parts.push(P('s', limb([hip, knee, foot], B.leg), null, 'S'));
+      parts.push(P(B.legC || 's', limb([hip, knee, foot], B.leg), null, B.legLine || 'S'));
       var top = [foot[0], foot[1] - B.sockH];
       if (bent) { var sl = Math.hypot(knee[0] - foot[0], knee[1] - foot[1]) || 1; top = [foot[0] + (knee[0] - foot[0]) * B.sockH / sl, foot[1] + (knee[1] - foot[1]) * B.sockH / sl]; }
       parts.push(P(B.sock, cap(top[0], top[1], foot[0], foot[1] - 0.6, B.leg + 0.25), null, B.sockLine));
@@ -121,8 +121,17 @@
     arms.forEach(function (a, i) {
       var sh = B.sh[i], el = a[0], hd = a[1], up = a[2];
       parts.push(P('s', limb([sh, el, hd], B.arm), null, 'S'));
-      var end = along(sh, el, B.sleeve);
-      parts.push(P(B.top, sleeve(sh[0], sh[1], end[0], end[1], B.arm + B.sleeveW), B.topTex, B.topLine));
+      if (B.long) {
+        // a long sleeve (Uncle Ollie's jumper) to just short of the hand, its cuff a shade deeper
+        var cuffAt = along(el, hd, 0.82);
+        parts.push(P(B.top, limb([sh, el, cuffAt], B.arm + B.sleeveW), function (x, y) {
+          var dx = x + 0.5 - cuffAt[0], dy = y + 0.5 - cuffAt[1];
+          return dx * dx + dy * dy < 5 ? B.topLine : B.top;
+        }, B.topLine));
+      } else {
+        var end = along(sh, el, B.sleeve);
+        parts.push(P(B.top, sleeve(sh[0], sh[1], end[0], end[1], B.arm + B.sleeveW), B.topTex, B.topLine));
+      }
       var hand = ell(hd[0], hd[1] + (up ? -0.4 : 0.8), B.hand + (up ? 0.2 : 0), B.hand);
       if (up) {
         // fingers spread, palm out: a wave
@@ -508,6 +517,143 @@
     // puffed: bent over towards us, knees out, hands on them, grinning
     F.luke.puff = posed(LUKE, { lean: 0.1, hipLean: 0, hunch: 0.6, shift: 1, drop: 6, knees: [-1, 1], shorts: bentShorts, extra: drop,
       feet: [[17.5, 76.4], [31, 76.4]], arms: [[[15.4, 55], [13.8, 62.4]], [[36.8, 56], [36.6, 62.6]]] }, 'cheer');
+  })();
+
+  // a part of a player's head (art.js) moved onto a cameo's, dx right and dy down
+  var shift = function (p, dx, dy) {
+    return { c: p.c, line: p.line, f: function (x, y) { return p.f(x - dx, y - dy); }, tex: p.tex ? function (x, y) { return p.tex(x - dx, y - dy); } : null };
+  };
+  // a grown-up's face, as Luke's: long in the jaw
+  var longFace = function (cx, cy, ry, rx) {
+    return function (x, y) {
+      var r = rx * (y > cy + 1.5 ? 1 - 0.22 * Math.min(1, (y - cy - 1.5) / (ry - 1.5)) : 1), dx = (x - cx) / r, dy = (y - cy) / ry;
+      return dx * dx + dy * dy <= 1;
+    };
+  };
+
+  /* ---- Uncle Ollie (Christmas) ---------------------------------------------
+     Built the way Luke is, a head taller than the cousins: his wavy golden
+     hair to his shoulders and his beard are the player's own (art.js),
+     moved onto this head; his green Christmas jumper with its band of
+     little Fair Isle diamonds and ribbed cuffs and hem, his grey suit
+     trousers, brown boots. Cheering, he laughs his big laugh. */
+  (function () {
+    var cx = 26, cy = 19.5, DX = 2.5, DY = 4;
+    var pal = merge(SKIN, EYES, {
+      1: '#7c5420', 2: '#a8782e', 3: '#d4a44a', 4: '#ecc878', 5: '#fbe6b4',
+      m: '#a8404c', h: '#ffffff',
+      v: '#2c8a52', V: '#18603a', y: '#f6f2e6',
+      j: '#8c94a6', J: '#5c6478',
+      z: '#7a4a28', Z: '#3e2614', N: '#4e3018'
+    });
+    var noLight = '12345stuqESwIcmhZ';
+    var H = A.ollieHair, beard = shift(A.ollieBeard, DX, DY), D = A.fairIsle;
+    var jumperTex = function (x, y) {
+      // the band of diamonds across his chest, a line above and below, and the ribbed hem
+      if (y === 36 || y === 40) return 'y';
+      if (y > 36 && y < 40 && D[y - 37].charAt(((x - 1) % 4 + 4) % 4) === 'y') return 'y';
+      if (y >= 50) return (x & 1) ? 'v' : 'V';
+      return 'v';
+    };
+    var body = {
+      sh: [[16.4, 33], [33, 33]], arm: 2.2, hand: 2.2, sleeveW: 1.3, long: true,
+      legs: [[[21, 53], [20.8, 64.5], [20.6, 76.4]], [[27.6, 53], [27.8, 64.5], [28, 76.4]]],
+      leg: 2.2, sock: 'j', sockLine: 'J', sockH: 2, shoe: 'z', sole: 'Z', shoeLine: 'N', shoeRx: 3.6, shoeRy: 2.1,
+      neck: [26, 26, 25.6, 31.5], neckR: 2.6,
+      top: 'v', topLine: 'V', topTex: jumperTex
+    };
+    var faceF = longFace(cx, cy, 9.4, 8.6);
+    var at = function (x, y) { return H.at(x - DX, y - DY); };
+    var OLLIE = {
+      H: 80, pal: pal, noLight: noLight, body: body,
+      behind: function () { return [shift(H.behind, DX, DY)]; },
+      shorts: function () {
+        // his grey suit trousers, down to his boots
+        return [P('j', or(rrect(16.8, 49, 31.8, 56, 2), sleeve(21, 52, 20.6, 74.6, 3.3), sleeve(27.6, 52, 28, 74.6, 3.3)),
+          function (x, y) { return x === 24 && y > 55 ? 'J' : 'j'; }, 'J')];
+      },
+      top: function () {
+        var jumper = but(rrect(14.6, 30, 34.6, 52.5, 3.6), ell(25.8, 29.6, 3, 2.2));
+        return [P('v', jumper, jumperTex, 'V'), P('v', but(ell(25.8, 30, 4.2, 3), ell(25.8, 29.6, 3, 2.2)), function () { return 'V'; }, 'V')];
+      },
+      head: function () {
+        return [
+          P('s', faceF, function (x, y) { if (at(x + 0.5, y - 0.5) || at(x + 0.5, y - 1.5) || x < 20) return 't'; return 's'; }, 'q'),
+          beard, shift(H.near, DX, DY), shift(H.far, DX, DY), shift(H.crown, DX, DY)
+        ];
+      },
+      face: function (rows, kind) {
+        stamp(rows, 21, 19, ['cc']); stamp(rows, 30, 19, ['cc']);
+        var eye = kind === 'blink' ? SHUT : kind === 'cheer' ? JOY : EYE;
+        stamp(rows, 23, 16, eye); stamp(rows, 29, 16, eye);
+        stamp(rows, 22, 14, ['222']); stamp(rows, 29, 14, ['222']);
+        stamp(rows, 23, 22, ['.233332.', '22333322']);
+        // his big laugh (cheering), a grin (waving), a smile
+        var mouth = kind === 'cheer' ? [24, 24, ['mmmmm', 'mhhhm', 'mqqqm', '.mmm.']] : kind === 'wave' ? [23, 24, ['mhhhhm', '.mmmm.']] : [23, 24, ['mhhhhm', '.mmmm.']];
+        stamp(rows, mouth[0], mouth[1], mouth[2]);
+      }
+    };
+    F.ollie = setOf(OLLIE);
+  })();
+
+  /* ---- Aunty Grace (Christmas) ----------------------------------------------
+     Built the way Lucy is: her long dark curls, half up, are the player's
+     own (art.js) moved onto this head; red lipstick and a big smile; her
+     pink-and-red dress with its swirly print and puffed sleeves, gathered
+     at the waist, its skirt to the knee; her sparkly necklace; black
+     tights and red shoes. */
+  (function () {
+    var cx = 26, cy = 16.5, DX = 2.5, DY = 1.2;
+    var pal = merge(SKIN, EYES, {
+      1: '#160c0a', 2: '#2c1812', 3: '#4a2a1e', 4: '#6e4230', 5: '#9a6a4c',
+      I: '#8a5432', E: '#2a1612', m: '#d42c46', h: '#ffffff',
+      a: '#ec4258', A: '#ae1f3a', y: '#ff9ccc',
+      g: '#2a2430', G: '#141018',
+      z: '#c41c34', Z: '#5a0e1c', x: '#7a1022',
+      o: '#ffffff', O: '#c8d2ea'
+    });
+    var noLight = '12345stuqESwIcmhoOy';
+    var H = A.graceHair;
+    var dressTex = function (x, y) { return (x * 3 + y * 5) % 7 === 0 || ((x + 1) * 3 + y * 5) % 11 === 0 && y % 3 === 1 ? 'y' : 'a'; };
+    var body = {
+      sh: [[16.4, 31.5], [32.8, 31.5]], arm: 2.1, hand: 2.1, sleeve: 0.95, sleeveW: 2.4,
+      legs: [[[21.4, 50], [21.2, 61], [21, 72.4]], [[27.6, 50], [27.8, 61], [28, 72.4]]],
+      leg: 2, legC: 'g', legLine: 'G', sock: 'g', sockLine: 'G', sockH: 2, shoe: 'z', sole: 'x', shoeLine: 'Z', shoeRx: 3.2, shoeRy: 1.9,
+      neck: [26, 23, 25.8, 30], neckR: 2.3,
+      top: 'a', topLine: 'A', topTex: dressTex
+    };
+    var faceF = longFace(cx, cy, 9.2, 8.3);
+    var at = function (x, y) { return H.at(x - DX, y - DY); };
+    var GRACE = {
+      H: 76, pal: pal, noLight: noLight, body: body,
+      behind: function () { return [shift(H.behind, DX, DY)]; },
+      shorts: function () {
+        // the dress's skirt, flaring a little from the waist to the knee
+        return [P('a', function (x, y) { return y > 44 && y < 60.5 - Math.abs(x - 24.5) * 0.06 && Math.abs(x - 24.5) < 7.6 + (y - 44) * 0.2; }, dressTex, 'A')];
+      },
+      top: function () {
+        // the bodice, a round neck, and a seam at the waist
+        var bodice = but(rrect(15, 28.5, 34.2, 46.5, 4), ell(25.8, 28.4, 2.9, 2));
+        return [P('a', bodice, function (x, y) { return y === 45 ? 'A' : dressTex(x, y); }, 'A')];
+      },
+      head: function () {
+        return [
+          P('s', faceF, function (x, y) { if (at(x + 0.5, y - 0.5) || at(x + 0.5, y - 1.5) || x < 20) return 't'; return 's'; }, 'q'),
+          shift(H.near, DX, DY), shift(H.far, DX, DY), shift(H.crown, DX, DY)
+        ];
+      },
+      face: function (rows, kind) {
+        stamp(rows, 21, 18, ['cc']); stamp(rows, 30, 18, ['cc']);
+        var eye = kind === 'blink' ? SHUT : kind === 'cheer' ? JOY : EYE;
+        stamp(rows, 22, 13, eye); stamp(rows, 29, 13, eye);
+        stamp(rows, 21, 11, ['222']); stamp(rows, 28, 11, ['222']);
+        var mouth = kind === 'cheer' || kind === 'wave' ? [23, 20, ['mmmmmm', 'mhhhhm', '.mmmm.']] : [23, 20, ['mmmmmm', 'mhhhhm', '.mmmm.']];
+        stamp(rows, mouth[0], mouth[1], mouth[2]);
+        // the necklace: sparkling stones round the neckline
+        stamp(rows, 22, 28, ['o.......o', '.O.....O.', '..oOoOo..']);
+      }
+    };
+    F.grace = setOf(GRACE);
   })();
 
   /* A scene of parts with stamps on top, painted in its own palette and
@@ -1184,4 +1330,19 @@
     return list;
   } });
   (A.sheet = A.sheet || []).push(group);
+  /* The cousins, Uncle Ollie and Aunty Grace (tools/sheet.html?only=cousins):
+     every frame, big and small, their cameos, bikes and heads. */
+  var cousins = ['cousins'];
+  Object.defineProperty(cousins, 1, { get: function () {
+    var list = [];
+    ['beau', 'winnie', 'ollie', 'grace'].forEach(function (w) {
+      var Q = A.player(w);
+      if (F[w]) list.push([w + ' cameo', F[w].idle], ['', F[w].wave[0]], ['', F[w].cheer]);
+      ['idle', 'run1', 'run2', 'run3', 'jump', 'cheer', 'dead', 'swim', 'throw', 'crouch'].forEach(function (k, i) { list.push([i ? k : w, Q.b[k]]); });
+      ['idle', 'run1', 'run2', 'run3', 'jump', 'cheer', 'blink', 'dead', 'swim'].forEach(function (k, i) { list.push([i ? k : 'small', Q.s[k]]); });
+      list.push([w + ' head', Q.head], ['bike', F.bikeFor(w).b.ride[0]], ['', F.bikeFor(w).s.ride[1]]);
+    });
+    return list;
+  } });
+  A.sheet.push(cousins);
 })();

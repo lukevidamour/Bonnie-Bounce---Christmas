@@ -284,7 +284,22 @@
        look.neck    'crew' (a tee) or 'open' (a shirt's collar), not his V
        look.rib     false: no ribbed hem; look.crest false: no crest
        look.print   (x, y in the top, its top-left at 0, 0) → true where
-                    the top's print is, painted in y */
+                    the top's print is, painted in y
+     The Christmas edition's cousins, uncle and aunty added a few more:
+       look.armStripe  a stripe in y down each long sleeve, and
+       look.legStripe  one down each trouser leg (Beau's tracksuit)
+       look.cuff       (d) → the colour of a long sleeve d px from the
+                       hand (Winnie's bomber's striped cuffs), or null
+       look.hem        (y) → the colour of the top's bottom rows, y up
+                       from its hem (his bomber's striped waistband)
+       look.neck       also 'bomber': a white tee's crew neck inside a
+                       striped ribbed collar; 'zip': a tracksuit's stand-
+                       up collar, closed to the chin
+       look.dress      a skirt from the waist to the knee in k/K (the
+                       dress's colours), the print carrying on down it,
+                       over bare legs or look.tights (a colour char, its
+                       edge look.tightsLine)
+       look.puff       a short sleeve this much fuller at the shoulder */
   // a point t of the way from a to b
   var along = function (a, b, t) { return [a[0] + (b[0] - a[0]) * t, a[1] + (b[1] - a[1]) * t]; };
   // a capsule cut square at its far end: a short sleeve, a leg of shorts
@@ -303,11 +318,36 @@
     return { c: 'z', f: ell(foot[0] + 0.8, sy, rx, ry), line: lk.shoeLine || 'z',
       tex: lk.sole ? function (x, y) { return y + 0.5 > sy + ry - 1 ? 'Z' : 'z'; } : null };
   };
+  // how far a point is from a line of joints (a stripe runs down its middle)
+  var offLine = function (pts, x, y) {
+    var best = 1e9;
+    for (var i = 0; i < pts.length - 1; i++) {
+      var a = pts[i], b = pts[i + 1], dx = b[0] - a[0], dy = b[1] - a[1], L = dx * dx + dy * dy;
+      var t = L ? Math.max(0, Math.min(1, ((x - a[0]) * dx + (y - a[1]) * dy) / L)) : 0;
+      best = Math.min(best, Math.hypot(a[0] + t * dx - x, a[1] + t * dy - y));
+    }
+    return best;
+  };
+  /* A dress's skirt: from the waist, flaring out to a hem just above the
+     knees, wide enough to take in both legs wherever they've gone (a
+     running stride swings it out). */
+  var skirt = function (hips, knees, waistY, r) {
+    var hemY = (knees[0][1] + knees[1][1]) / 2 - 0.6;
+    var x0 = Math.min(hips[0][0], knees[0][0], knees[1][0]) - r, x1 = Math.max(hips[1][0], knees[0][0], knees[1][0]) + r;
+    var w0 = hips[0][0] - r + 0.6, w1 = hips[1][0] + r - 0.6;
+    return function (x, y) {
+      if (y < waistY || y > hemY) return false;
+      var u = (y - waistY) / Math.max(1, hemY - waistY);
+      return x > w0 + (x0 - w0) * u && x < w1 + (x1 - w1) * u;
+    };
+  };
   // the top's tex: the kit's stripe, the print, the ribbed hem
-  var topTex = function (o, top, hem, lk) {
+  var topTex = function (o, top, hem, lk, bottom) {
     return function (x, y) {
       // a football kit's stripe down the middle: red ('y' in the kit's colours) edged in white
       if (KIT === 'stripe') { var dx = Math.abs(x + 0.5 - (o + 16)); if (dx < 2) return 'y'; if (dx < 3) return 'w'; }
+      // a waistband of its own (Winnie's bomber)
+      if (lk.hem && bottom !== undefined) { var hc = lk.hem(bottom - (y + 0.5)); if (hc) return hc; }
       // a print (Dad's squiggles), but not on a football kit
       if (lk.print && !KIT && lk.print(x - o, y - top)) return 'y';
       if (lk.rib === false) return 'b';
@@ -317,6 +357,20 @@
   // the neckline: his shirt's V and collar, a tee's crew neck, or an open collar
   var neckParts = function (o, top, v, lk, collar) {
     if (lk.neck === 'crew') return [{ c: 's', f: function (x, y) { var dx = (x - o - 16.6) / 3.4, dy = (y - top + 0.4) / 2.3; return y >= top && dx * dx + dy * dy <= 1; }, line: 'B' }];
+    if (lk.neck === 'bomber') {
+      // a white tee's crew neck, inside a ribbed collar striped like the cuffs
+      var ring = function (x, y) { var dx = (x - o - 16.6) / 4.6, dy = (y - top + 0.6) / 3.3; return y >= top - 0.6 && dx * dx + dy * dy <= 1; };
+      return [
+        { c: 'y', f: ring, line: 'B', tex: function (x, y) { var dx = (x + 0.5 - o - 16.6) / 4.6, dy = (y + 0.5 - top + 0.6) / 3.3, d = Math.sqrt(dx * dx + dy * dy); return d > 0.86 ? 'y' : d > 0.74 ? 'w' : 'y'; } },
+        { c: 'w', f: function (x, y) { var dx = (x - o - 16.6) / 3, dy = (y - top + 0.4) / 2; return y >= top && dx * dx + dy * dy <= 1; }, line: 'W' },
+        { c: 's', f: function (x, y) { var dx = (x - o - 16.6) / 2.4, dy = (y - top + 0.6) / 1.4; return y >= top && dx * dx + dy * dy <= 1; }, line: 'q' }
+      ];
+    }
+    if (lk.neck === 'zip') {
+      // a tracksuit top zipped to the chin: its collar stands up round the neck, white-edged
+      return [{ c: 'b', f: function (x, y) { return y >= top - 2.2 && y < top + 1.4 && Math.abs(x - o - 16.5) < 3.6 - Math.max(0, y - top) * 0.3; }, line: 'B',
+        tex: function (x, y) { return y < top - 1.2 ? 'y' : 'b'; } }];
+    }
     if (lk.neck === 'open') {
       var d = v * 1.1;
       return [
@@ -395,12 +449,17 @@
       if (lk.jeans) {
         // long trousers: the shoe, then the leg of them down over its top
         parts.push(shoePart(foot, B.shoe, 1.55, lk));
-        parts.push({ c: 'k', f: limb([hip, knee, [foot[0], foot[1] - 0.9]], B.leg + lk.jeans), line: 'K', tex: lk.bones ? legBones(hip, knee, foot, B === BIG ? 1 : 0.7) : undefined });
+        var tr = [hip, knee, [foot[0], foot[1] - 0.9]];
+        parts.push({ c: 'k', f: limb(tr, B.leg + lk.jeans), line: 'K', tex: lk.bones ? legBones(hip, knee, foot, B === BIG ? 1 : 0.7)
+          : lk.legStripe && !KIT ? function (x, y) { return offLine(tr, x + 0.5, y + 0.5) < (B === BIG ? 0.62 : 0.5) ? 'y' : 'k'; } : undefined });
         return;
       }
-      parts.push({ c: 's', f: limb([mid, knee, foot], B.leg), line: 'S' });
+      // under a dress, the leg runs all the way up (in tights, if she's wearing them)
+      var legC = lk.tights || 's', legL = lk.tights ? lk.tightsLine || 'K' : 'S';
+      parts.push({ c: legC, f: limb([lk.dress ? hip : mid, knee, foot], B.leg), line: legL });
       if (B.sock && lk.sock !== false) parts.push({ c: 'w', f: cap(foot[0], foot[1] - B.sock - 0.4, foot[0], foot[1] - 0.3, B.leg + 0.3), line: 'W' });
       parts.push(lk.sole || lk.shoeLine ? shoePart(foot, B.shoe, 1.55, lk) : { c: 'z', f: ell(foot[0] + 0.8, foot[1] + 0.4, B.shoe, 1.55), line: 'z' });
+      if (lk.dress) return;
       if (lk.shorts) {
         // longer shorts, cut square at the hem (frayed, for denim)
         var end = along(hip, knee, lk.shorts), r = B.leg + 1.4, hl = B === BIG ? 1.2 : 0.6;
@@ -411,10 +470,14 @@
       } else parts.push({ c: 'k', f: cap(hip[0], hip[1], mid[0], mid[1], B.leg + 1.4), line: 'K' });
     });
     var hips = lk.bones && hipsPrint(o, top, B);
-    parts.push({ c: 'k', f: rrect(o + B.short[0], top + B.short[1], o + B.short[2], top + B.short[3], 1.2), line: 'K',
+    if (lk.dress && !lk.bones) {
+      // the dress's skirt, flaring from the waist to just above the knees, its print carrying on down it
+      var sk = skirt(B.hips.map(T), pose.legs.map(function (L) { return T(L[0]); }), top + B.short[1] - 1, B.leg + 1.6);
+      parts.push({ c: 'k', f: sk, line: 'K', tex: function (x, y) { return lk.print && !KIT && lk.print(x - o, y - top) ? 'y' : 'k'; } });
+    } else parts.push({ c: 'k', f: rrect(o + B.short[0], top + B.short[1], o + B.short[2], top + B.short[3], 1.2), line: 'K',
       tex: function (x, y) { return (hips && hips(x, y)) || (x === o + 16 && y > top + B.short[1] + 2 ? 'K' : 'k'); } });
     // the jumper, its ribbed hem, the shirt's V and collar, the crest
-    var ribs = lk.bones && ribsPrint(o, top, B), tt = topTex(o, top, B.hem, lk);
+    var ribs = lk.bones && ribsPrint(o, top, B), tt = topTex(o, top, B.hem, lk, top + t[3]);
     parts.push({ c: 'b', f: rrect(o + t[0], top + t[1], o + t[2], top + t[3], 3), line: 'B', tex: ribs ? function (x, y) { return ribs(x, y) || 'b'; } : tt });
     parts = parts.concat(neckParts(o, top, B.v, lk, true));
     if (lk.crest === false) return parts;
@@ -430,17 +493,30 @@
         // a bare arm, and a short sleeve over the top of it
         var len = lk.sleeve * (B === BIG ? 1 : 0.7), ul = Math.hypot(el[0] - sh[0], el[1] - sh[1]) || 1;
         parts.push({ c: 's', f: limb([sh, el, hd], B.arm - (lk.bare || 0)), line: 'S' });
-        var se = along(sh, el, Math.min(1, len / ul));
-        parts.push({ c: 'b', f: cuffed(sh, se, B.arm + 0.35), line: 'B', tex: lk.print ? function (x, y) { return !KIT && lk.print(x - o + 3, y - top + 3) ? 'y' : 'b'; } : null });
+        var se = along(sh, el, Math.min(1, len / ul)), sl = cuffed(sh, se, B.arm + 0.35);
+        // a puffed sleeve, gathered full at the shoulder (Aunty Grace's dress)
+        if (lk.puff) { var pr = B.arm + 0.35 + lk.puff * (B === BIG ? 1 : 0.7), pc = along(sh, se, 0.3), sl0 = sl; sl = function (x, y) { return sl0(x, y) || (x - pc[0]) * (x - pc[0]) + (y - pc[1]) * (y - pc[1]) <= pr * pr; }; }
+        parts.push({ c: 'b', f: sl, line: 'B', tex: lk.print ? function (x, y) { return !KIT && lk.print(x - o + 3, y - top + 3) ? 'y' : 'b'; } : null });
       } else {
         // the arm's bones, the upper one to the elbow and the forearm to the cuff
         var k = B === BIG ? 1 : 0.75, fl = Math.hypot(hd[0] - el[0], hd[1] - el[1]) || 1;
         var bones = lk.bones && bonePrint([sh, el, along(el, hd, Math.max(0.2, 1 - (B.arm + 1.4) / fl))], 0.75 * k + 0.05, 1.15 * k);
         parts.push({ c: 'b', f: limb([sh, el, hd], B.arm), line: 'B',
-          tex: function (x, y) { var dx = x + 0.5 - hd[0], dy = y + 0.5 - hd[1]; return (bones && bones(x, y)) || (dx * dx + dy * dy < (B.arm + 1.2) * (B.arm + 1.2) ? 'B' : 'b'); } });
+          tex: function (x, y) {
+            var dx = x + 0.5 - hd[0], dy = y + 0.5 - hd[1], d = Math.sqrt(dx * dx + dy * dy);
+            if (bones) { var bn = bones(x, y); if (bn) return bn; }
+            // a cuff of its own (Winnie's striped ones), and a tracksuit's stripe down the arm
+            if (lk.cuff && !KIT) { var cc = lk.cuff(d - B.hand); if (cc) return cc; }
+            if (lk.armStripe && !KIT && d > B.arm + 1.4 && offLine([sh, el, hd], x + 0.5, y + 0.5) < (B === BIG ? 0.6 : 0.48)) return 'y';
+            return d < B.arm + 1.2 ? 'B' : 'b';
+          } });
       }
       var hand = ell(hd[0], hd[1] + (up ? -0.6 : 0.8), B.hand + (up ? 0.3 : 0), B.hand);
-      if (up) {
+      if (up === 2) {
+        // a thumbs up: a fist, the thumb stuck straight up out of its top (Winnie, in his photo)
+        var fist = ell(hd[0], hd[1] + 0.6, B.hand + 0.4, B.hand + 0.2), thumb = cap(hd[0] + (i ? -0.3 : 0.3), hd[1] - 0.6, hd[0] + (i ? -0.4 : 0.4), hd[1] - 4.6 * (B === BIG ? 1 : 0.8), 1.05);
+        hand = function (x, y) { return fist(x, y) || thumb(x, y); };
+      } else if (up) {
         // fingers spread wide
         var fingers = [-2.2, -0.75, 0.75, 2.2].map(function (dx) { return cap(hd[0] + dx * 0.6, hd[1] - 1.5, hd[0] + dx * 1.05, hd[1] - 3.8 + Math.abs(dx) * 0.35, 0.95); });
         var h0 = hand;
@@ -459,7 +535,7 @@
         parts.push({ c: 'k', f: limb([hip, knee, [foot[0], foot[1] - 0.9]], 1.9 + lk.jeans), line: 'K', tex: lk.bones ? legBones(hip, knee, foot, 0.8) : undefined });
         return;
       }
-      parts.push({ c: 's', f: limb([hip, knee, foot], 1.9), line: 'S' });
+      parts.push({ c: lk.tights || 's', f: limb([hip, knee, foot], 1.9), line: lk.tights ? lk.tightsLine || 'K' : 'S' });
       parts.push(lk.sole || lk.shoeLine ? shoePart(foot, 3, 1.5, lk) : { c: 'z', f: ell(o + L[4] + 0.8, top + L[5] + 0.4, 3, 1.5), line: 'z' });
       if (lk.shorts) parts.push({ c: 'k', f: cuffed(hip, along(hip, knee, lk.shorts), 3.2), line: 'K' });
     });
@@ -488,7 +564,9 @@
   var frame = function (size, poseName, kind, ch) {
     ch = ch || BON;
     if (KIT === 'bones') ch = onesie(ch);
-    var B = size === 'b' ? BIG : SMALL, top = HEAD_H, H2 = top + B.h, pose = typeof poseName === 'string' ? POSES[size][poseName] : poseName;
+    // (a character can have a pose of its own: Winnie's thumbs up)
+    var own = ch.poses && ch.poses[size] && typeof poseName === 'string' && ch.poses[size][poseName];
+    var B = size === 'b' ? BIG : SMALL, top = HEAD_H, H2 = top + B.h, pose = own || (typeof poseName === 'string' ? POSES[size][poseName] : poseName);
     var parts, neck = { c: 's', f: cap(HX + 17, 21, HX + 16.5, top + 1.5, size === 'b' ? 2.5 : 2.1), line: 'q' };
     var behind = ch.behind ? ch.behind() : [];
     if (poseName === 'crouch') { H2 = top + 13; parts = behind.concat(CROUCH(top, ch), [neck], ch.head()); }
@@ -507,7 +585,7 @@
     var lk = {}, k;
     for (k in ch.look) lk[k] = ch.look[k];
     for (k in BONES) lk[k] = BONES[k];
-    return (ch.onesie = { pal: ch.pal, noLight: ch.noLight, head: ch.head, face: ch.face, behind: ch.behind, look: lk });
+    return (ch.onesie = { pal: ch.pal, noLight: ch.noLight, head: ch.head, face: ch.face, behind: ch.behind, poses: ch.poses, look: lk });
   };
   // every frame a player has, built for ch
   var frameSet = function (ch) {
@@ -845,11 +923,292 @@
     };
   })();
 
-  /* A.player(who): who is 'bonnie', 'lucy' or 'luke'. The same shape as
-     A.bonnie (s, b, kits.stripe, kits.bones, pose, head, red, rainbow, ghost), plus
-     look (how their clothes differ from Bonnie's, for family.js's bike).
-     Mum and Dad are built the first time they're asked for, then kept. */
-  var CAST = { lucy: LUCY, luke: LUKE }, PLAYERS = { bonnie: P };
+  /* ==========================================================================
+     THE COUSINS — Beau and Winnie, Uncle Ollie and Aunty Grace (Christmas,
+     from Luke's photos, 29 Oct), on the same puppet as Bonnie, Mum and
+     Dad: the same frames and sizes, the head in the same place (so every
+     hat fits), the same eyes. Everyone plays exactly the same; only the
+     look is their own.
+     ========================================================================== */
+  // a child's face: Bonnie's own shape, a touch longer for Beau (he's eight)
+  var kidFace = function (longer) {
+    return function (x, y) {
+      var cx = HX + 17.5, cy = 14.2 + HY + longer * 0.5, ry = 8.4 + longer, rx = 8.4 * (y > cy + 1 ? 1 - 0.28 * Math.min(1, (y - cy - 1) / (ry - 1)) : 1);
+      var dx = (x - cx) / rx, dy = (y - cy) / ry;
+      return dx * dx + dy * dy <= 1;
+    };
+  };
+  var hash2 = function (a, b) { var n = Math.sin(a * 91.7 + b * 47.3) * 43758.5453; return n - Math.floor(n); };
+  /* Long hair falling past the face on both sides, for Beau, Uncle Ollie
+     and Aunty Grace: a crown parted at o.px, a curtain each side of the
+     face down to o.len (over the ears), and the mass of it behind the head
+     and shoulders. o.wave: how much it waves (its edges and strands
+     ripple); o.ends: the ends a shade lighter (sun-bleached, Beau's);
+     o.curls: ringlets instead of strands (Aunty Grace's); o.up: the top
+     smoothed back, half up, so the crown is sleek and the curls start
+     lower. Returns { behind, crown, near, far, at }. */
+  var flowing = function (o) {
+    var px = o.px, wv = o.wave || 0, len = o.len;
+    var dome = ell(21.8, 12.2, 11.9, 11.4), lit = orb(17.5, 3, 14, 11.5);
+    var hairline = function (x) { return x < px ? 5 + Math.pow((px - x) / 8.4, 1.6) * 8.8 : 5 + Math.pow((x - px) / 7, 1.6) * 6.4; };
+    var ripple = function (y, k) { return wv ? Math.sin(y * 0.62 + k) * wv : 0; };
+    // a strand's tone: lit along the side towards the light, a strand or
+    // two darker, the crest of each wave catching the light, the ends
+    // lighter (or darker), the tips cut in a soft curve
+    var strandTone = function (x, y, u, lit0) {
+      var X = x + 0.5, Y = y + 0.5;
+      if (o.curls) {
+        // ringlets: rows of round curls, each lit on its upper left
+        var cy0 = Y + (Math.floor(X / 3) % 2) * 1.5, ci = Math.floor(cy0 / 3), cx = (Math.floor(X / 3) + 0.5) * 3, cyy = (ci + 0.5) * 3 - (Math.floor(X / 3) % 2) * 1.5;
+        var dx = X - cx, dy = Y - cyy, d = Math.hypot(dx, dy);
+        if (d > 1.65) return '1';
+        var li = -(0.6 * dx + 0.8 * dy) / 1.5;
+        return li > 0.35 ? (lit0 ? '4' : '3') : li < -0.4 ? '2' : '3';
+      }
+      var s = X + ripple(Y, 0.3) * 1.2, k = Math.floor(s / 2.1), t = hash2(k, 3) < 0.3 ? '2' : '3';
+      if (u < 0.32 && lit0) t = '4';
+      if (u > 0.8) t = '2';
+      if (wv && Math.sin(Y * 0.62 + 1.9) > 0.82 && u < 0.7) t = hairStep(t, 1);
+      if (o.ends && Y > len - 7) t = hairStep(t, 1);
+      return t;
+    };
+    var curtain = function (x0, x1, top, mid, half, k, lit0) {
+      var end = function (x) { var v = (x - mid) / half; return len - v * v * 2.4 + ripple(x * 1.7, k) * 0.8; };
+      var L = function (y) { return x0 - Math.max(0, y - 18) * 0.12 + ripple(y, k); }, R = function (y) { return x1 + Math.max(0, y - 18) * 0.12 + ripple(y, k); };
+      return { c: '3', line: '1',
+        f: function (x, y) { return y > top && y < end(x) && x > L(y) && x < R(y); },
+        tex: function (x, y) { var Y = y + 0.5, l = L(Y), r = R(Y); return strandTone(x, y, (x + 0.5 - l) / Math.max(1, r - l), lit0); } };
+    };
+    var near = curtain(o.near[0], o.near[1], o.up ? 12 : 8, (o.near[0] + o.near[1]) / 2, (o.near[1] - o.near[0]) / 2, 0, true);
+    var far = curtain(o.far[0], o.far[1], o.up ? 11 : 7, (o.far[0] + o.far[1]) / 2, (o.far[1] - o.far[0]) / 2, 2, false);
+    var crown = { c: '3', line: '1', f: function (x, y) { return dome(x, y) && y < hairline(x); },
+      tex: function (x, y) {
+        var X = x + 0.5, Y = y + 0.5, t = lit(x, y), a = Math.atan2(Y - 1, X - px);
+        if (Math.abs(X - px) < 0.6 && Y < 5.5) return '1';
+        if (o.curls && !o.up) return strandTone(x, y, 0.5, X < px);
+        // half up: combed back smooth, a band of sheen across it
+        var d = Math.hypot((X - 21.5) / 1.15, Y - 12.4);
+        if (d > 8.2 && d < 9.6 && X < px - 1.5 && Y < 9) t = hairStep(t, 1);
+        if (Math.floor(a * 8 + 100) % 3 === 0) t = hairStep(t, -1);
+        return t;
+      } };
+    var backF = function (x, y) {
+      if (dome(x, y)) return true;
+      return y > 10 && y < (o.back || len) + ripple(x * 1.3, 1) * 0.9 - Math.pow((x - 22) / 14, 2) * 2 && x > o.near[0] - 1.5 - Math.max(0, y - 18) * 0.16 && x < o.far[1] + 1 + Math.max(0, y - 18) * 0.16;
+    };
+    var behind = { c: '2', f: backF, line: '1', tex: function (x, y) {
+      if (o.curls) { var t = strandTone(x, y, 0.6, false); return t === '1' ? '1' : '2'; }
+      if (y > (o.back || len) - 2.5) return o.ends ? '3' : '1';
+      if (Math.floor(x * 0.8 + ripple(y, 0.3) + y * 0.1) % 3 === 0) return '1';
+      return '2';
+    } };
+    return { behind: behind, crown: crown, near: near, far: far, at: function (x, y) { return crown.f(x, y) || near.f(x, y) || far.f(x, y); } };
+  };
+  // a big gap-toothed grin (Beau and Winnie, both with a front tooth out)
+  var GAP = ['.qqqqq.', 'qwwqwwq', '.qmmmq.'];
+
+  /* ---- Beau -----------------------------------------------------------------
+     Eight: long, wavy, dark-blond hair parted near the middle, falling past
+     his shoulders, lighter at the ends; blue eyes, rosy cheeks and a big
+     gap-toothed grin. His royal-blue tracksuit, zipped to the chin, with a
+     white stripe down each arm and leg; white trainers. (No badge.) */
+  var BEAU = (function () {
+    var H = flowing({ px: 22.8, near: [11.2, 17.6], far: [30.4, 36], len: 31.5, back: 31, wave: 0.8, ends: true });
+    return {
+      pal: merge(BPAL, {
+        1: '#5e3f1c', 2: '#8a6330', 3: '#b48a4e', 4: '#d8b674', 5: '#f2dca8',
+        b: '#2f57d6', B: '#1a3392', y: '#ffffff', Y: '#cdd4ea',
+        k: '#2f57d6', K: '#1a3392',
+        z: '#f4f4fa', Z: '#2f57d6'
+      }),
+      noLight: NOLIGHT,
+      look: { jeans: 0.5, sole: true, shoeLine: 'W', neck: 'zip', rib: false, crest: false, armStripe: true, legStripe: true,
+        // the zip, white, straight down the middle
+        print: function (x, y) { return Math.abs(x + 0.5 - 16.6) < 0.55; } },
+      behind: function () { return [H.behind]; },
+      head: function () { return [{ c: 's', f: kidFace(0.4), line: 'q', tex: faceTex(H.at) }, H.near, H.far, H.crown]; },
+      face: function (rows, kind) {
+        paint(rows, 19, 18, ['pp']); paint(rows, 28, 18, ['pp']);
+        if (kind === 'hurt') { paint(rows, 20, 13, HURT); paint(rows, 26, 13, HURT); } else {
+          var eye = kind === 'blink' ? SHUT : EYE;
+          paint(rows, 21, 13, eye); paint(rows, 27, 13, eye);
+        }
+        paint(rows, 20, 11, ['22']); paint(rows, 27, 11, ['22']);
+        var mouth = { wheee: [22, 18, ['qqqqq', 'qwqwq', 'qmmmq', '.qqq.']], hurt: [24, 19, ['.q.', 'qmq', '.q.']], gasp: [24, 19, ['.q.', 'qmq', '.q.']] }[kind] || [20, 18, GAP];
+        paint(rows, mouth[0], mouth[1], mouth[2]);
+      }
+    };
+  })();
+
+  /* ---- Winnie ---------------------------------------------------------------
+     Five: a blond bob, a full fringe and the sides to his jaw, very rosy
+     cheeks, blue eyes and a gap-toothed grin; his black leather bomber
+     jacket, its collar, cuffs and waistband striped red and white, over a
+     white tee; dark trousers; black trainers. His cheer is the double
+     thumbs up from his photo. */
+  var WINNIE = (function () {
+    /* the bob: a round crown, a fringe swept a little across his brows,
+       and the sides curving in under his jaw, longer at the front (a bob
+       turns under at its ends) */
+    var dome = ell(23.2, 11.2, 12, 10.6), lit = orb(17, 3, 14, 12);
+    var fringeEnd = function (x) { return 10.6 + (x - 16) * 0.07 + (hash2(Math.floor(x / 1.7), 7) < 0.5 ? 0.7 : 0); };
+    var sides = function (x, y) {
+      var tuck = Math.pow(Math.max(0, y - 13.5), 2) * 0.055;
+      if (y < 8 || x < 11.4 + tuck || x > 35.4 - tuck) return false;
+      return y < 20.4 + Math.min(x - 11.4, 35.4 - x) * 0.3;
+    };
+    var bob = { c: '3', line: '1',
+      f: function (x, y) {
+        if (!dome(x, y) && !sides(x, y)) return false;
+        // the face shows under the fringe, between the sides
+        return !(y > fringeEnd(x) && x > 16 && x < 31.4);
+      },
+      tex: function (x, y) {
+        var X = x + 0.5, Y = y + 0.5, t = lit(x, y);
+        // straight strands combed down from the crown, the sheen in a band
+        var d = Math.hypot((X - 22) / 1.1, Y - 11);
+        if (d > 7.6 && d < 9.2 && X < 27 && Y < 10) t = hairStep(t, 1);
+        if (Math.floor(X * 0.7 + Math.max(0, Y - 6) * 0.06) % 3 === 0 && Y > 4) t = hairStep(t, -1);
+        if (Y > 20) t = hairStep(t, -1);
+        return t;
+      } };
+    var back = { c: '2', line: '1', f: function (x, y) { return dome(x, y) || sides(x, y); },
+      tex: function (x, y) { return Math.floor(x * 0.7) % 3 === 0 ? '1' : '2'; } };
+    // the stripes on his bomber's collar, cuffs and waistband: red, white, red
+    var band = function (d) { return d < 0 || d > 3 ? null : d < 1 ? 'y' : d < 2 ? 'w' : 'y'; };
+    return {
+      pal: merge(BPAL, {
+        1: '#9c6c24', 2: '#c99838', 3: '#ebc25e', 4: '#f9df90', 5: '#fff6d8',
+        p: '#ff8f8a',
+        b: '#3a3540', B: '#18151d', y: '#dc2c3c', Y: '#9c1828',
+        k: '#2a2733', K: '#141219',
+        z: '#24212c', Z: '#f4f4fa'
+      }),
+      noLight: NOLIGHT,
+      look: { jeans: 0.45, sole: true, neck: 'bomber', rib: false, crest: false, legStripe: true,
+        cuff: function (d) { return band(d + 0.4); },
+        hem: function (d) { return band(d - 0.2); } },
+      // the double thumbs up, held out in front of him
+      poses: {
+        b: { cheer: { arms: [[[5.5, 9], [3.6, 5.4, 2]], [[26.5, 9], [28.4, 5.4, 2]]], legs: [[[13.2, 25.5], [13, 30]], [[18.8, 25.5], [19, 30]]] } },
+        s: { cheer: { arms: [[[6, 5.6], [3.8, 3, 2]], [[26, 5.6], [28.2, 3, 2]]], legs: [[[13.4, 12.6], [13.2, 14]], [[18.6, 12.6], [18.8, 14]]] } }
+      },
+      behind: function () { return [back]; },
+      head: function () { return [{ c: 's', f: kidFace(0), line: 'q', tex: faceTex(bob.f) }, bob]; },
+      face: function (rows, kind) {
+        // his cheeks: very rosy
+        paint(rows, 18, 17, ['.pp', 'ppp']); paint(rows, 28, 17, ['pp.', 'ppp']);
+        if (kind === 'hurt') { paint(rows, 20, 13, HURT); paint(rows, 26, 13, HURT); } else {
+          var eye = kind === 'blink' ? SHUT : EYE;
+          paint(rows, 21, 13, eye); paint(rows, 27, 13, eye);
+        }
+        var mouth = { wheee: [22, 18, ['qqqqq', 'qwqwq', 'qmmmq', '.qqq.']], hurt: [24, 19, ['.q.', 'qmq', '.q.']], gasp: [24, 19, ['.q.', 'qmq', '.q.']] }[kind] || [20, 18, GAP];
+        paint(rows, mouth[0], mouth[1], mouth[2]);
+      }
+    };
+  })();
+
+  /* ---- Uncle Ollie ----------------------------------------------------------
+     Wavy golden hair to his shoulders, parted in the middle, and a full
+     beard a shade darker, trimmed close; blue eyes and a big smile. For
+     Christmas, a green jumper with a snowflake band across the chest, his
+     grey suit trousers, and brown boots. */
+  var OLLIE = (function () {
+    var H = A.ollieHair = flowing({ px: 23.4, near: [11.4, 17.2], far: [30.6, 35.8], len: 28.5, back: 28, wave: 0.7 });
+    // the beard: along his jaw from the sideburns, round his mouth and over
+    // his chin (a little below it), with a moustache over his top lip
+    var mouthHole = ell(24.3, 20.4, 2.9, 1.05);
+    var beardF = function (x, y) {
+      if (mouthHole(x, y)) return false;
+      if (adultFace(x, y)) return (y > 15.5 && (x < 17.2 || x > 30.4)) || y > 18.6 - Math.max(0, 1 - Math.abs(x - 24.3) / 6) * 0.6 || (y > 17.4 && (x < 19.6 || x > 29));
+      // a little below his chin
+      return ell(23.6, 22.6, 7.2, 3.6)(x, y) && y > 21;
+    };
+    var beard = A.ollieBeard = { c: '2', line: '1', f: beardF, tex: function (x, y) {
+      var X = x + 0.5, Y = y + 0.5;
+      if (Y > 24.2) return '1';
+      if (X < 19 || Y > 22.6) return hash2(x, y) < 0.3 ? '1' : '2';
+      return hash2(x, y) < 0.22 ? '2' : hash2(x + 3, y) < 0.18 ? '4' : '3';
+    } };
+    // the jumper's band, Fair Isle: a zigzag between two lines (not
+    // snowflakes or diamonds: drawn this small, both read as crosses, and
+    // there are no crosses in the art)
+    var DIAMOND = A.fairIsle = ['y...', '.y.y', '..y.'];
+    var print = function (x, y) {
+      var X = Math.floor(x), Y = Math.floor(y);
+      if (Y === 4 || Y === 8) return true;
+      if (Y > 4 && Y < 8) return DIAMOND[Y - 5].charAt(((X - 1) % 4 + 4) % 4) === 'y';
+      return false;
+    };
+    return {
+      pal: merge(BPAL, {
+        1: '#7c5420', 2: '#a8782e', 3: '#d4a44a', 4: '#ecc878', 5: '#fbe6b4',
+        b: '#2c8a52', B: '#18603a', y: '#f6f2e6', Y: '#c8c0ac',
+        k: '#8c94a6', K: '#5c6478',
+        z: '#7a4a28', Z: '#3e2614'
+      }),
+      noLight: NOLIGHT,
+      look: { jeans: 0.6, sole: true, neck: 'crew', crest: false, print: print },
+      behind: function () { return [H.behind]; },
+      head: function () { return [{ c: 's', f: adultFace, line: 'q', tex: faceTex(H.at) }, beard, H.near, H.far, H.crown]; },
+      face: function (rows, kind) {
+        paint(rows, 19, 16, ['pp']); paint(rows, 28, 16, ['pp']);
+        if (kind === 'hurt') { paint(rows, 20, 13, HURT); paint(rows, 26, 13, HURT); } else {
+          var eye = kind === 'blink' ? SHUT : EYE;
+          paint(rows, 21, 13, eye); paint(rows, 27, 13, eye);
+        }
+        paint(rows, 20, 11, ['222']); paint(rows, 27, 11, ['222']);
+        // the moustache over the smile
+        paint(rows, 21, 18, ['.233332.', '22333322']);
+        var mouth = { wheee: [22, 20, ['qwwwq', '.qmq.']], hurt: [23, 20, ['qmq', '.q.']], gasp: [23, 20, ['qmq', '.q.']] }[kind] || [21, 20, ['qwwwwwq', '.qqqqq.']];
+        paint(rows, mouth[0], mouth[1], mouth[2]);
+      }
+    };
+  })();
+
+  /* ---- Aunty Grace -----------------------------------------------------------
+     Long dark curly hair, worn half up, the curls tumbling past her
+     shoulders; dark eyes, red lipstick and a big smile; her pink-and-red
+     dress with its swirly print and puffed sleeves, and a sparkly
+     necklace; for Christmas, black tights and red shoes. */
+  var GRACE = (function () {
+    var H = A.graceHair = flowing({ px: 22.2, near: [10.6, 17.4], far: [30.2, 37], len: 34.5, back: 35, wave: 0.5, curls: true, up: true });
+    // the dress's print: little pink flicks and swirls, scattered
+    var print = function (x, y) { var X = Math.floor(x), Y = Math.floor(y); return (X * 3 + Y * 5) % 7 === 0 || ((X + 1) * 3 + Y * 5) % 11 === 0 && Y % 3 === 1; };
+    return {
+      pal: merge(BPAL, {
+        1: '#160c0a', 2: '#2c1812', 3: '#4a2a1e', 4: '#6e4230', 5: '#9a6a4c',
+        m: '#d42c46', I: '#8a5432', E: '#2a1612',
+        b: '#ec4258', B: '#ae1f3a', y: '#ff9ccc', Y: '#e06aa6',
+        k: '#ec4258', K: '#ae1f3a',
+        g: '#2a2430', G: '#141018',
+        z: '#c41c34', Z: '#5a0e1c',
+        o: '#ffffff', D: '#c8d2ea'
+      }),
+      noLight: NOLIGHT.concat(['o', 'D']),
+      look: { sleeve: 7.4, bare: 0.45, puff: 1.3, dress: true, tights: 'g', tightsLine: 'G', sock: false, sole: true, neck: 'crew', rib: false, crest: false, print: print },
+      behind: function () { return [H.behind]; },
+      head: function () { return [{ c: 's', f: adultFace, line: 'q', tex: faceTex(H.at) }, H.near, H.far, H.crown]; },
+      face: function (rows, kind) {
+        paint(rows, 19, 17, ['pp']); paint(rows, 28, 17, ['pp']);
+        if (kind === 'hurt') { paint(rows, 20, 13, HURT); paint(rows, 26, 13, HURT); } else if (kind === 'blink') { paint(rows, 20, 15, ['EEE']); paint(rows, 27, 15, ['EEE']); }
+        else { paint(rows, 20, 13, ['EEE', '.Ew', '.IE']); paint(rows, 27, 13, ['EEE', 'Ew.', 'IE.']); }
+        paint(rows, 20, 11, ['222']); paint(rows, 27, 11, ['222']);
+        // red lips, and a big smile showing her teeth
+        var mouth = { wheee: [22, 19, ['mmmmm', 'mwwwm', '.mmm.']], hurt: [24, 20, ['.m.', 'mqm', '.m.']], gasp: [24, 20, ['.m.', 'mqm', '.m.']] }[kind] || [21, 19, ['mmmmmmm', 'mwwwwwm', '.mmmmm.']];
+        paint(rows, mouth[0], mouth[1], mouth[2]);
+        // the sparkly necklace, round the neckline
+        paint(rows, 19, 24, ['o......o', '.D....D.', '..oDDo..']);
+      }
+    };
+  })();
+
+  /* A.player(who): who is 'bonnie', 'lucy', 'luke', 'beau', 'winnie',
+     'ollie' or 'grace'. The same shape as A.bonnie (s, b, kits.stripe,
+     kits.bones, pose, head, red, rainbow, ghost), plus look (how their
+     clothes differ from Bonnie's, for family.js's bike). Everyone but
+     Bonnie is built the first time they're asked for, then kept. */
+  var CAST = { lucy: LUCY, luke: LUKE, beau: BEAU, winnie: WINNIE, ollie: OLLIE, grace: GRACE }, PLAYERS = { bonnie: P };
   P.look = BON.look;
   A.player = function (who) {
     if (PLAYERS.hasOwnProperty(who)) return PLAYERS[who];
