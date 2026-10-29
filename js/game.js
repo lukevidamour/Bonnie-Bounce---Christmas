@@ -986,7 +986,12 @@
      many times, the two cats counted together). */
   var OUTFITS = [
     { id: 'everyday', name: 'EVERYDAY', need: 0, v: null },
-    { id: 'jumper', name: 'JUMPER', level: 1, v: BB.variant('xjumper', { b: '#d8283a', B: '#9a1426', y: '#ffffff', Y: '#d8dcea', k: '#3a4a7a', K: '#24305a' }), hat: 'bobble' },
+    /* Beau and Winnie's school uniform (Amherst: bottle green, a white
+       polo, grey shorts) and their team's kit (Luke asked for both, 29 Oct;
+       colours only, never a badge or a sponsor) */
+    { id: 'school', name: 'SCHOOL', need: 0, set: 'school', v: BB.variant('xschool', { b: '#1f5c34', B: '#123c22', k: '#7c808a', K: '#565a64', z: '#24202c', Z: '#3a3440' }) },
+    { id: 'manutd', name: 'MAN UTD', level: 1, set: 'kit', v: BB.variant('xmanutd', { b: '#da1f2b', B: '#9a1220', y: '#ffffff', Y: '#1c1c24', k: '#f4f4fa', K: '#c8ccd8', g: '#1c1c24', G: '#0c0c12', z: '#24202c', Z: '#f4f4fa' }) },
+    { id: 'jumper', name: 'JUMPER', level: 3, v: BB.variant('xjumper', { b: '#d8283a', B: '#9a1426', y: '#ffffff', Y: '#d8dcea', k: '#3a4a7a', K: '#24305a' }), hat: 'bobble' },
     { id: 'snowman', name: 'SNOWMAN', level: 2, v: BB.variant('xsnowman', { b: '#f4f6fc', B: '#b8c4dc', y: '#24202e', Y: '#141018', k: '#f4f6fc', K: '#b8c4dc' }), hat: 'tophat' },
     { id: 'elf', name: 'ELF', level: 4, v: BB.variant('xelf', { b: '#3aa84a', B: '#227a32', y: '#ffd23e', Y: '#c98a12', k: '#e83a4a', K: '#a81c2a' }), hat: 'elf' },
     { id: 'reindeer', name: 'REINDEER', need: 4, v: BB.variant('xreindeer', { b: '#9a6a3c', B: '#6a4422', y: '#f0d8b0', Y: '#c8a878', k: '#9a6a3c', K: '#6a4422' }), hat: 'antlers' },
@@ -4904,8 +4909,15 @@
     chocolate: ['rgba(110,56,24,0.78)', 'rgba(200,140,90,0.9)', 'rgba(160,96,52,0.5)'],
     beeland: ['rgba(240,160,24,0.6)', 'rgba(255,236,150,0.9)', 'rgba(255,200,80,0.45)'],
     jamaica: ['rgba(40,200,210,0.45)', 'rgba(230,255,255,0.9)', 'rgba(150,240,240,0.4)'],
-    antarctica: ['rgba(40,90,170,0.5)', 'rgba(230,246,255,0.9)', 'rgba(150,200,240,0.35)']
+    antarctica: ['rgba(40,90,170,0.5)', 'rgba(230,246,255,0.9)', 'rgba(150,200,240,0.35)'],
+    // the Christmas evening seas: violet at dusk off Fort Grey, deep blue under Herm's moon and Sark's stars
+    bays: ['rgba(90,110,200,0.42)', 'rgba(255,220,200,0.85)', 'rgba(200,170,230,0.35)'],
+    fortgrey: ['rgba(50,64,150,0.5)', 'rgba(220,210,255,0.85)', 'rgba(140,140,220,0.35)'],
+    herm: ['rgba(30,46,120,0.55)', 'rgba(210,230,255,0.85)', 'rgba(120,150,220,0.35)'],
+    sark: ['rgba(30,40,110,0.55)', 'rgba(210,230,255,0.85)', 'rgba(120,150,220,0.35)']
   };
+  // the open sea's own colours in those worlds: [deep, deeper, wave, crest]
+  var SEA_COL = { fortgrey: ['#2a3a7a', '#1e2c62', '#6a7ad0', '#d8d8ff'], herm: ['#1c2a6a', '#121c50', '#5a72c8', '#c8d8ff'], sark: ['#1a2664', '#10184a', '#5068c0', '#c8d8ff'], bays: ['#3a5aa8', '#2a4488', '#9aa8e8', '#ffe8e0'] };
   var drawOverlay = function (ctx) {
     var c = G.cam, W = BB.W, g = G.gfx;
     var x0 = Math.max(0, Math.floor(c.x / T) - 1), x1 = Math.min(G.w - 1, Math.floor((c.x + W) / T) + 1);
@@ -5049,7 +5061,9 @@
     crookedhouse: [0.55, 34, '#ffc860', 0.24], bonfire: [0.4, 76, '#ff8a30', 0.44], candle3: [0.9, 32, '#ffd890', 0.34],
     crystalball: [0.62, 30, '#a8f0ff', 0.32, 0.5], glowshroom6: [0.5, 26, '#c08aff', 0.34, 0.6], twistytree: [0.12, 34, '#9ae8c8', 0.26, 0.6],
     fountain6: [0.65, 40, '#9aff70', 0.3], lamppost: [0.88, 40, '#ffe08a', 0.36], inflatable: [0.5, 26, '#e8f0ff', 0.2],
-    ghostband: [0.5, 40, '#c8f0ff', 0.26, 0.5], organ: [0.5, 50, '#ffd890', 0.2], pumpkinband: [0.5, 36, '#ffa040', 0.3]
+    ghostband: [0.5, 40, '#c8f0ff', 0.26, 0.5], organ: [0.5, 50, '#ffd890', 0.2], pumpkinband: [0.5, 36, '#ffa040', 0.3],
+    // Christmas (backdropx2.js): the Town's lamps, a shop's tree, Sark's lanterns, a lit dormer window
+    x2lamp: [0.86, 40, '#ffe08a', 0.36], x2shoptree: [0.55, 28, '#ffd890', 0.26], x2lantern: [0.6, 34, '#ffc870', 0.36], x2dormer: [0.45, 30, '#ffc870', 0.3]
   };
   var gatherLights = function () {
     var pts = G.light.points, th = G.th, c = G.cam, W = BB.W, p = G.p, dark = !!(th.light && th.light.dark);
@@ -5138,12 +5152,13 @@
     for (var tx = x0; tx <= x1; tx++) {
       if (!G.sea[tx]) continue;
       var x = tx * T - snap(c.x);
-      ctx.fillStyle = '#2c88d0'; ctx.fillRect(x, top + 2, T, H - top);
-      ctx.fillStyle = '#1e64b0'; ctx.fillRect(x, top + 10, T, H - top);
+      var SC = SEA_COL[G.def.theme] || ['#2c88d0', '#1e64b0', '#78d8ff', '#ffffff'];
+      ctx.fillStyle = SC[0]; ctx.fillRect(x, top + 2, T, H - top);
+      ctx.fillStyle = SC[1]; ctx.fillRect(x, top + 10, T, H - top);
       for (var k = 0; k < T; k++) {
         var wx = tx * T + k, h2 = Math.round(1 + Math.sin(wx * 0.35 + ph) * 1.2);
-        ctx.fillStyle = '#78d8ff'; ctx.fillRect(x + k, top + h2, 1, 3 - h2 + 1);
-        ctx.fillStyle = '#ffffff'; if (h2 === 0) ctx.fillRect(x + k, top, 1, 1);
+        ctx.fillStyle = SC[2]; ctx.fillRect(x + k, top + h2, 1, 3 - h2 + 1);
+        ctx.fillStyle = SC[3]; if (h2 === 0) ctx.fillRect(x + k, top, 1, 1);
         if (((wx + Math.floor(ph * 3)) % 23) < 3) { ctx.fillStyle = '#e8f8ff'; ctx.fillRect(x + k, top + 7, 1, 1); }
       }
     }
@@ -6337,9 +6352,9 @@
   /* The pages: FRIENDS (Bear and Prince, from every level they came home
      from), WHO'S PLAYING?, CREATURES, the ADVENT CALENDAR (a door for
      every one found), and OUTFITS. */
-  var bookPages = function () { return ['friends', 'players', 'creatures', 'advent', 'outfits']; };
-  var PAGE_NAME = { friends: 'FRIENDS', players: "WHO'S PLAYING?", creatures: 'CREATURES', advent: 'ADVENT CALENDAR', outfits: 'OUTFITS' };
-  var PAGE_COL = { friends: '#e86aa4', players: '#e8504a', creatures: '#46a83e', advent: '#d8283a', outfits: '#4a96dc' };
+  var bookPages = function () { return ['friends', 'players', 'creatures', 'advent', 'outfits'].concat(OUTFITS.length > 9 ? ['outfits2'] : []); };
+  var PAGE_NAME = { friends: 'FRIENDS', players: "WHO'S PLAYING?", creatures: 'CREATURES', advent: 'ADVENT CALENDAR', outfits: 'OUTFITS', outfits2: 'OUTFITS' };
+  var PAGE_COL = { friends: '#e86aa4', players: '#e8504a', creatures: '#46a83e', advent: '#d8283a', outfits: '#4a96dc', outfits2: '#4a96dc' };
   // the players' cells: the three children in the top row, the four grown-ups under them
   var playerCells = function () {
     var W = BB.W, out = [];

@@ -28,14 +28,17 @@
     ks.forEach(function (k) {
       if (k === 'cameo') { if (A.family[w]) items.push(A.family[w].idle); return; }
       if (k === 'wave' || k === 'ccheer') { if (A.family[w]) items.push(k === 'wave' ? A.family[w].wave[0] : A.family[w].cheer); return; }
+      // (school, kit: that outfit's own frames, in its colours: &k=school)
+      if (k === 'school' || k === 'kit') { var Kt = A.player(w).kits[k][sz]; items.push({ sp: Kt.idle, v: BB.variant('look-' + k, k === 'kit' ? { b: '#da1f2b', B: '#9a1220', y: '#ffffff', Y: '#1c1c24', k: '#f4f4fa', K: '#c8ccd8', g: '#1c1c24', G: '#0c0c12', z: '#24202c', Z: '#f4f4fa' } : { b: '#1f5c34', B: '#123c22', k: '#7c808a', K: '#565a64', z: '#24202c', Z: '#3a3440' }) }); return; }
       var P = A.player(w); if (P[sz][k]) items.push(P[sz][k]);
     });
   });
-  var W = items.reduce(function (a, s) { return a + s.w + 3; }, 3), H = items.reduce(function (a, s) { return Math.max(a, s.h); }, 0) + 6;
+  items = items.map(function (it) { return it.sp ? it : { sp: it, v: null }; });
+  var W = items.reduce(function (a, s) { return a + s.sp.w + 3; }, 3), H = items.reduce(function (a, s) { return Math.max(a, s.sp.h); }, 0) + 6;
   var cv = document.getElementById('out'), g = cv.getContext('2d');
   cv.width = W * Z; cv.height = H * Z; g.imageSmoothingEnabled = false;
   g.fillStyle = '#7fb8e8'; g.fillRect(0, 0, cv.width, cv.height);
-  var x = 3; items.forEach(function (s) { BB.draw(g, s, x * Z, (H - 3 - s.h) * Z, false, null, Z); x += s.w + 3; });
+  var x = 3; items.forEach(function (it) { var s = it.sp; BB.draw(g, s, x * Z, (H - 3 - s.h) * Z, false, it.v, Z); x += s.w + 3; });
   var save = q('save', '');
   if (save) cv.toBlob(function (b) { fetch('/reel/frame?i=' + save, { method: 'POST', body: b }).then(function () { document.title = 'saved ' + save; }); });
 </script>

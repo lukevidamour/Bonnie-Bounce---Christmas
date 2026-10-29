@@ -532,28 +532,26 @@
   };
 
   /* ---- Uncle Ollie (Christmas) ---------------------------------------------
-     Built the way Luke is, a head taller than the cousins: his wavy golden
-     hair to his shoulders and his beard are the player's own (art.js),
-     moved onto this head; his green Christmas jumper with its band of
-     little Fair Isle diamonds and ribbed cuffs and hem, his grey suit
-     trousers, brown boots. Cheering, he laughs his big laugh. */
+     Built the way Luke is, a head taller than the cousins: his golden-
+     ginger hair and his beard are the player's own (art.js), moved onto
+     this head; his sage-green knit jumper, ribbed at the cuffs and hem,
+     a white tee's collar at its neck, dark jeans, brown boots. Cheering,
+     he laughs his big laugh. */
   (function () {
     var cx = 26, cy = 19.5, DX = 2.5, DY = 4;
     var pal = merge(SKIN, EYES, {
-      1: '#7c5420', 2: '#a8782e', 3: '#d4a44a', 4: '#ecc878', 5: '#fbe6b4',
+      1: '#6e3e18', 2: '#a46a30', 3: '#d4a050', 4: '#ecc47e', 5: '#f8e2b0',
       m: '#a8404c', h: '#ffffff',
-      v: '#2c8a52', V: '#18603a', y: '#f6f2e6',
-      j: '#8c94a6', J: '#5c6478',
+      v: '#6f8f5c', V: '#4c6a40', y: '#f6f2e6',
+      j: '#3a4a6a', J: '#26304a',
       z: '#7a4a28', Z: '#3e2614', N: '#4e3018'
     });
     var noLight = '12345stuqESwIcmhZ';
-    var H = A.ollieHair, beard = shift(A.ollieBeard, DX, DY), D = A.fairIsle;
+    var H = A.ollieHair, beard = shift(A.ollieBeard, DX, DY);
     var jumperTex = function (x, y) {
-      // the band of diamonds across his chest, a line above and below, and the ribbed hem
-      if (y === 36 || y === 40) return 'y';
-      if (y > 36 && y < 40 && D[y - 37].charAt(((x - 1) % 4 + 4) % 4) === 'y') return 'y';
+      // a chunky knit: its rows of stitches, just showing, and the ribbed hem
       if (y >= 50) return (x & 1) ? 'v' : 'V';
-      return 'v';
+      return (x + (y >> 1)) % 5 === 0 && y % 2 ? 'V' : 'v';
     };
     var body = {
       sh: [[16.4, 33], [33, 33]], arm: 2.2, hand: 2.2, sleeveW: 1.3, long: true,
@@ -574,7 +572,8 @@
       },
       top: function () {
         var jumper = but(rrect(14.6, 30, 34.6, 52.5, 3.6), ell(25.8, 29.6, 3, 2.2));
-        return [P('v', jumper, jumperTex, 'V'), P('v', but(ell(25.8, 30, 4.2, 3), ell(25.8, 29.6, 3, 2.2)), function () { return 'V'; }, 'V')];
+        // (and the white tee's collar inside its neck)
+        return [P('v', jumper, jumperTex, 'V'), P('v', but(ell(25.8, 30, 4.2, 3), ell(25.8, 29.6, 3, 2.2)), function () { return 'V'; }, 'V'), P('y', but(ell(25.8, 29.8, 3, 2.2), ell(25.8, 29.4, 2.2, 1.5)), null, 'V')];
       },
       head: function () {
         return [
@@ -586,7 +585,7 @@
         stamp(rows, 21, 19, ['cc']); stamp(rows, 30, 19, ['cc']);
         var eye = kind === 'blink' ? SHUT : kind === 'cheer' ? JOY : EYE;
         stamp(rows, 23, 16, eye); stamp(rows, 29, 16, eye);
-        stamp(rows, 22, 14, ['222']); stamp(rows, 29, 14, ['222']);
+        stamp(rows, 22, 14, ['333']); stamp(rows, 29, 14, ['333']);
         stamp(rows, 23, 22, ['.233332.', '22333322']);
         // his big laugh (cheering), a grin (waving), a smile
         var mouth = kind === 'cheer' ? [24, 24, ['mmmmm', 'mhhhm', 'mqqqm', '.mmm.']] : kind === 'wave' ? [23, 24, ['mhhhhm', '.mmmm.']] : [23, 24, ['mhhhhm', '.mmmm.']];
