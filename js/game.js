@@ -777,8 +777,8 @@
       if (!e.up && p.x + p.w > e.x) {
         e.up = 1; G.check = Math.max(G.check || 0, e.x); sfx('check'); if (BB.voice) BB.voice.play('yay'); p.waveT = 50;
         G.ents.forEach(function (b) { if (b.k === 'bear' && b.mode === 'follow') b.happy = 50; });
-        var cw = turnOf(G.n, e.ix), gs = 'GO ' + nameOf(who(), cw) + '!';
-      fx('text', e.x + 2 - BB.textW(gs) / 2, e.y - 8, { s: gs, vy: -0.4, life: 60, col: '#ff94cc' });
+        var gs = 'GO ' + nameOf(who()) + '!';
+        fx('text', e.x + 2 - BB.textW(gs) / 2, e.y - 8, { s: gs, vy: -0.4, life: 60, col: '#ff94cc' });
       }
       if (e.up && e.up < 24) e.up++;
     },
@@ -1002,24 +1002,20 @@
   var outfitOpen = function (o) { return o.level ? save.cleared.indexOf(o.level) > -1 : o.medals ? medalsTotal() >= o.medals : catsHome() >= o.need; };
   // the sprites an outfit is drawn from: his usual ones, or a kit's own set
   /* Who's playing: anyone in the family (Luke asked for everyone, 29
-     Oct) — Bonnie, his cousins Beau and Winnie, Mum and Dad (Lucy and
-     Luke), and Beau and Winnie's mum and dad, Aunty Grace and Uncle Ollie
-     — chosen on the sticker book's WHO'S PLAYING page. Their sprites are
+     Oct) — Bonnie, his cousins Beau and Winnie, Aunty Lucy and Uncle
+     Luke (Bonnie's mum and dad), and Aunty Grace and Uncle Ollie (Beau and
+     Winnie's) — chosen on the sticker book's WHO'S PLAYING page. Their sprites are
      built the first time they're asked for (art.js, A.player); outfits
      and power-ups recolour everyone the same way, and everyone plays
      exactly the same. */
   var WHO = ['bonnie', 'beau', 'winnie', 'lucy', 'luke', 'grace', 'ollie'];
   var KIDS = { bonnie: 1, beau: 1, winnie: 1 };
-  /* What the children call everyone (the brief: "Uncle Ollie", "Aunty
-     Grace" and so on, from whoever's point of view is playing). A
-     grown-up playing sees it through their own child's eyes. */
-  var VIEW = { bonnie: 'bonnie', beau: 'beau', winnie: 'beau', lucy: 'bonnie', luke: 'bonnie', grace: 'beau', ollie: 'beau' };
-  var CALL = {
-    bonnie: { bonnie: 'BONNIE', beau: 'BEAU', winnie: 'WINNIE', lucy: 'MUM', luke: 'DAD', grace: 'AUNTY GRACE', ollie: 'UNCLE OLLIE' },
-    beau: { bonnie: 'BONNIE', beau: 'BEAU', winnie: 'WINNIE', lucy: 'AUNTY LUCY', luke: 'UNCLE LUKE', grace: 'MUM', ollie: 'DAD' }
-  };
-  // w's name as `by` would say it (by: whoever's speaking; the player, if no one)
-  var nameOf = function (w, by) { return CALL[VIEW[by || who()]][w]; };
+  /* What the game calls everyone: the children by name, and all four
+     grown-ups Aunty and Uncle, whoever's playing — so it's as much Beau
+     and Winnie's game as Bonnie's, and nobody's mum and dad are anyone
+     else's (Luke asked, 29 Oct). */
+  var CALL = { bonnie: 'BONNIE', beau: 'BEAU', winnie: 'WINNIE', lucy: 'AUNTY LUCY', luke: 'UNCLE LUKE', grace: 'AUNTY GRACE', ollie: 'UNCLE OLLIE' };
+  var nameOf = function (w) { return CALL[w]; };
   var who = function () { return WHO.indexOf(save.who) > -1 ? save.who : 'bonnie'; };
   var hero = function () { return (A.player && A.player(who())) || A.bonnie; };
   // the sprites an outfit is drawn from: the player's usual ones, or a kit's own set
@@ -5556,7 +5552,8 @@
         case 'note': ctx.fillStyle = f.col; ctx.fillRect(x, y, 1.5, 1.5); ctx.fillRect(x + 1, y - 3.5, 0.5, 4); ctx.fillRect(x + 1, y - 3.5, 1.5, 0.5); break;
         case 'ember': ctx.fillStyle = f.t < 8 ? '#ffd23c' : '#fa9c38'; ctx.fillRect(x, y, 1, 1); break;
         case 'bubble': BB.draw(ctx, A.bubble[f.t > 40 ? 1 : 0], x, y); break;
-        case 'text': if (!BB.reel) BB.text(ctx, f.s, x, y, { color: f.col || '#ffffff', outline: '#1c1428' }); break;
+        // (nudged onto the screen if it's partly on it: something speaking near the edge of a narrow screen would be cut off)
+        case 'text': var tw = BB.textW(f.s); if (!BB.reel) BB.text(ctx, f.s, x < BB.W && x + tw > 0 ? Math.max(2, Math.min(BB.W - 2 - tw, x)) : x, y, { color: f.col || '#ffffff', outline: '#1c1428' }); break;
         case 'heart': ctx.globalAlpha = Math.max(0, 1 - f.t / f.life); BB.draw(ctx, A.heartSmall, x, y); ctx.globalAlpha = 1; break;
         case 'petal': ctx.globalAlpha = Math.max(0, 1 - f.t / f.life); ctx.fillStyle = f.col; ctx.fillRect(x, y, f.t % 10 < 5 ? 1.5 : 1, f.t % 10 < 5 ? 1 : 1.5); ctx.globalAlpha = 1; break;
         case 'leaf': {
@@ -5745,9 +5742,22 @@
     var j = G.joke, W = BB.W;
     j.t++;
     if (j.t > 300) { G.joke = null; return; }
-    var s = j.t < 110 ? j.a : j.b, w = Math.min(W - 8, BB.textW(s) + 14), x = Math.round(W / 2 - w / 2), y = 26;
-    UI.paper(ctx, x, y, w, 14, { stitch: false });
-    BB.text(ctx, s, W / 2, y + 4, { color: j.t < 110 ? INK : PICK, align: 'center' });
+    var s = j.t < 110 ? j.a : j.b, lines = fitLines(s, W - 22), tw = Math.max.apply(null, lines.map(function (l) { return BB.textW(l); }));
+    var w = Math.min(W - 8, tw + 14), x = Math.round(W / 2 - w / 2), y = 26;
+    UI.paper(ctx, x, y, w, 6 + lines.length * 8, { stitch: false });
+    lines.forEach(function (l, i) { BB.text(ctx, l, W / 2, y + 4 + i * 8, { color: j.t < 110 ? INK : PICK, align: 'center' }); });
+  };
+  /* Words broken into lines that fit a width, as few and as even as will
+     do: the longest jokes are wider than an iPad's picture, and a phone
+     held upright is only 160 across. */
+  var fitLines = function (s, maxW, sc) {
+    if (BB.textW(s, sc) <= maxW) return [s];
+    var words = s.split(' '), best = null;
+    for (var i = 1; i < words.length; i++) {
+      var a = words.slice(0, i).join(' '), b = words.slice(i).join(' '), m = Math.max(a.length, b.length);
+      if (!best || m < best[2]) best = [a, b, m];
+    }
+    return best && BB.textW(best[0], sc) <= maxW ? [best[0]].concat(fitLines(best[1], maxW, sc)) : [s];
   };
   /* The HUD is the game's own type and icons, outlined so they read over
      any sky, with no boxes round them: lives and stars on the left, the
@@ -5947,9 +5957,10 @@
     });
     drawLogo(ctx, W / 2, 8);
     // CHRISTMAS, on a red ribbon under the name
-    UI.ribbon(ctx, W / 2, W > 200 ? 70 : 54, 'CHRISTMAS', '#d8283a', { scale: W > 200 ? 2 : 1 });
-    // whoever's playing, on a trampoline beside the words
-    var tx = Math.round(W / 2 + Math.min(76, W / 2 - 24) - 8), b = titleBounce, P = hero();
+    var rib = W > 200 ? 2 : 1, ribR = W / 2 + (BB.textW('CHRISTMAS', rib) + 14 + rib * 2) / 2 + 7;
+    UI.ribbon(ctx, W / 2, W > 200 ? 63 : 54, 'CHRISTMAS', '#d8283a', { scale: rib });
+    // whoever's playing, on a trampoline beside the words (clear of the ribbon's tail, on an iPad too)
+    var tx = Math.round(Math.min(W - 20, Math.max(W / 2 + Math.min(76, W / 2 - 24) - 8, ribR + 2))), b = titleBounce, P = hero();
     BB.draw(ctx, A.spring[b.squash ? 1 : 0], tx - 0, 118);
     var f = b.y < -2 ? P.s.jump : P.s.idle;
     var by = Math.round(110 - f.h + b.y + (b.squash ? 2 : 0));
@@ -5984,7 +5995,7 @@
     }
   };
   var MENU = ['CONTINUE', 'NEW GAME', 'GROWN-UPS'];
-  var menuBox = function () { var W = BB.W, kb = BB.inputMode !== 'touch', bw = kb ? 118 : 100, n = menuSure ? 2 : 3; return { x: Math.round((W > 220 ? W / 2 : W / 2 - 14) - bw / 2), y: W > 200 ? (kb ? 84 : 90) : 66, w: bw, h: (kb ? 22 : 10) + n * listRow, n: n }; };
+  var menuBox = function () { var W = BB.W, kb = BB.inputMode !== 'touch', bw = kb ? 118 : 100, n = menuSure ? 2 : 3; return { x: Math.round((W > 220 ? W / 2 : W / 2 - 14) - bw / 2), y: W > 200 ? (kb ? 86 : 91) : 66, w: bw, h: (kb ? 22 : 10) + n * listRow, n: n }; };
   /* NEW GAME wipes the island, so it asks first: a stray tap from a
      small finger should never cost anyone their progress. */
   var menuSure = false;
@@ -6065,7 +6076,11 @@
     var g = theme(tn), gy = 128;
     for (var x = 0; x < W; x += 8) { BB.draw(ctx, g.top[(x >> 3) & 1], x, gy); BB.draw(ctx, g.fill[(x >> 3) & 1], x, gy + 8); }
     var mid = Math.round(W / 2), Sl = A.sleigh, S6 = E.santa, Gs = E.gus;
-    var say = function (a, b, col) { if (a) BB.text(ctx, a, W / 2, 16, { color: col || '#ffffff', outline: dark, align: 'center', scale: 2 }); if (b) BB.text(ctx, b, W / 2, 36, { color: '#ffe048', outline: dark, align: 'center' }); };
+    // (big, as big as fits — 1.5 is still crisp — and the line under it broken in two if it must be)
+    var say = function (a, b, col) {
+      if (a) BB.text(ctx, a, W / 2, 16, { color: col || '#ffffff', outline: dark, align: 'center', scale: BB.textW(a, 2) <= W - 8 ? 2 : BB.textW(a, 1.5) <= W - 8 ? 1.5 : 1 });
+      if (b) fitLines(b, W - 8).forEach(function (l, i) { BB.text(ctx, l, W / 2, 36 + i * 8, { color: '#ffe048', outline: dark, align: 'center' }); });
+    };
     // 1 · the sleigh flying across, the team ahead of it, Father Christmas aboard
     var crashAt = 250, sx, sy, spin = 0;
     // (across to just right of the middle, whatever the screen's width, then down onto the quay there)
@@ -6398,7 +6413,7 @@
     var W = BB.W, out = [];
     WHO.forEach(function (w, i) {
       var row = i < 3 ? 0 : 1, n = row ? 4 : 3, k = row ? i - 3 : i, cw = Math.min(row ? 54 : 64, (W - 20) / n), x0 = W / 2 - cw * n / 2;
-      out.push({ w: w, i: i, x: x0 + k * cw, y: row ? 74 : 22, cw: cw, h: 50 });
+      out.push({ w: w, i: i, x: x0 + k * cw, y: row ? 76 : 24, cw: cw, h: 50 });
     });
     return out;
   };
@@ -6557,9 +6572,10 @@
         var nm = nameOf(c.w), parts = nm.split(' ');
         if (BB.textW(nm) > c.cw - 2 && parts.length > 1) { BB.text(ctx, parts[0], cx, feet + 9, { color: on ? PICK : INK, align: 'center' }); BB.text(ctx, parts.slice(1).join(' '), cx, feet + 16, { color: on ? PICK : INK, align: 'center' }); }
         else BB.text(ctx, nm, cx, feet + 9, { color: on ? PICK : INK, align: 'center' });
-        if (on) UI.cursor(ctx, snap(cx - 4), feet - f.h - 10, tick);
+        // the pudding pointing at whoever's chosen, beside them (above, it would sit on the words)
+        if (on) UI.cursor(ctx, snap(cx - f.w / 2 - UI.head.w - 2), snap(feet - f.h / 2 - UI.head.h / 2), tick);
       });
-      BB.text(ctx, 'TAP WHO YOU WANT TO BE', W / 2, 13, { color: INK, align: 'center' });
+      BB.text(ctx, BB.inputMode === 'touch' ? 'TAP WHO YOU WANT TO BE' : 'CHOOSE WHO YOU WANT TO BE', W / 2, 18, { color: INK, align: 'center' });
     } else if (pg === 'creatures') {
       var met = 0, cols = W > 200 ? 6 : 4, cw2 = (W - 24) / cols, rowsN = Math.ceil(STICKER_ORDER.length / cols), rh = Math.min(36, 96 / rowsN);
       STICKER_ORDER.forEach(function (key, i) {
@@ -6740,7 +6756,7 @@
 
   /* ---- the ending: Christmas morning ---------------------------------------------------
      The whole family round the tree in the snow — Bonnie, Beau and
-     Winnie, Mum and Dad, Aunty Grace and Uncle Ollie — with Bear and
+     Winnie, Aunty Lucy and Uncle Luke, Aunty Grace and Uncle Ollie — with Bear and
      Prince in their Christmas jumpers, Grabby Gus in a paper crown with a
      bag of chips, and Father Christmas waving from the sleigh as it flies
      over, all eight reindeer home. Then the credits roll up over them, and

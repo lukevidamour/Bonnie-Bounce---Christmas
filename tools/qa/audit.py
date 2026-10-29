@@ -268,7 +268,8 @@ def audit_pages(base, urls, sizes, a, ignore, port, interactions):
                 for w, h in group:
                     size(ws, w, h, touch, dpr=2)
                     go(ws, u + a.hash, 0.8)
-                    ok = ws.ev("document.readyState === 'complete' && document.body && document.body.innerText.trim().length > 40")
+                    # (a canvas game has next to no text: a visible canvas a decent size counts as loaded too)
+                    ok = ws.ev("document.readyState === 'complete' && document.body && (document.body.innerText.trim().length > 40 || [].some.call(document.querySelectorAll('canvas'), function (c) { var r = c.getBoundingClientRect(); return r.width > 150 && r.height > 100; }))")
                     if not ok:
                         found['not-loaded'][(label(u), '', '')].add(f'{w}x{h}'); continue
                     ws.ev(SETTLE)

@@ -74,7 +74,7 @@ Seven of the family, chosen on the sticker book's **WHO'S PLAYING?** page:
 
 - **Bonnie**, 6
 - **Beau**, 8, and **Winnie**, 5, his cousins
-- **Mum and Dad** (Lucy and Luke)
+- **Aunty Lucy and Uncle Luke**, Bonnie's mum and dad
 - **Aunty Grace and Uncle Ollie**, Beau and Winnie's mum and dad
 
 Everyone plays exactly the same, with the same jump and the same hitbox.
@@ -94,11 +94,11 @@ Whoever isn't playing turns up all over the place: cheering at the flags,
 answering the knock-knock doors in the Town, opening the cottage door at
 the end of each level, and together round the tree at the end.
 
-Everything the game says uses the names children use, from the point of
-view of whoever's playing. Playing as Bonnie it's "MUM", "DAD", "AUNTY
-GRACE" and "UNCLE OLLIE". Playing as Beau or Winnie it's "AUNTY LUCY",
-"UNCLE LUKE", "MUM" and "DAD". A grown-up playing sees it through their
-own child's eyes. Father Christmas calls everyone by their first name.
+Everything the game says uses the names children use, and it's the
+same whoever's playing, so it's as much Beau and Winnie's game as
+Bonnie's: the children by name, and the grown-ups "AUNTY LUCY", "UNCLE
+LUKE", "AUNTY GRACE" and "UNCLE OLLIE". Father Christmas calls everyone
+by their first name.
 
 ## The game
 
@@ -324,3 +324,55 @@ Last full run, 29 Oct:
   original's did at its bosses.
 - **Touch:** checked at iPad size (1024×768) with `?touch`: the level,
   the sticker book and the map.
+
+### First-play review (29 Oct)
+
+A new player's first few minutes, played at 8 screens with `?touch`:
+phones held sideways (667×375, 844×390, 932×430), a phone upright
+(390×844), and iPads (1024×768, 1180×820, 820×1180 upright). That's every
+game width from 160 to 312. To repeat it, load `index.html?touch`, add
+`tools/qa/firstplay.js` and run `FP.run('844x390')`. It saves 12 moments
+to `tools/reel/out/` (served by `tools/reel/serve.js`), and
+`python3 tools/qa/sheet.py 844x390` tiles them into one sheet.
+
+What it found, and what changed:
+
+- **Level 1's boats** worked but looked like plank jetties floating in
+  the air, lost against the harbour behind. They're now little painted
+  boats (red, blue and green) sitting in the water, each with a holly
+  wreath on the bow and Christmas lights up the mast. Level 7's boat too.
+- **The title:** TAP TO START touched the CHRISTMAS ribbon, and the menu
+  covered its lower edge. The ribbon moved up. On an iPad held sideways
+  the trampoline also overlapped the ribbon's tail; it's now placed from
+  the ribbon's real width.
+- **The sticker book's WHO'S PLAYING? page:** the pudding cursor sat on
+  the "TAP WHO YOU WANT TO BE" line, and the ribbon's tails clipped it.
+  The cursor now points from beside whoever's chosen.
+- **Narrow screens:** the longest cracker jokes ran off the screen on
+  every iPad, and the story's captions ran off a phone held upright.
+  Jokes and captions now break onto two even lines, and the story's big
+  words step down to a size that fits. Floating words said near the edge
+  of the screen are nudged onto it.
+- **Names:** Lucy and Luke are Aunty Lucy and Uncle Luke whoever is
+  playing, as Grace and Ollie are Aunty Grace and Uncle Ollie, so it's as
+  much Beau and Winnie's game as Bonnie's.
+
+The responsive audit (`tools/qa/audit.py`, 23 sizes from 280×653 to
+1920×1080) passes with nothing to fix. Its "loaded" check used to need
+40 characters of page text, which a game drawn on a canvas doesn't have,
+so it now also accepts a visible canvas.
+
+### On a real iPhone and iPad (5 minutes)
+
+Headless Chrome isn't Safari, so check these by hand once it's live:
+
+- [ ] Added to the Home Screen, the icon is the three boys in Santa hats.
+      iOS caches icons, so remove and re-add it if you added it before.
+- [ ] It opens full screen with no Safari bars, held sideways.
+- [ ] The first tap wakes the sound (the speaker on the title), and
+      music plays with the ringer switch on silent too.
+- [ ] ◀ ▶ and the mushroom JUMP sit under the thumbs and respond at once.
+      Hold a direction and the player speeds up.
+- [ ] Upright, the "Turn sideways" note shows and the game still plays.
+- [ ] Close Safari mid-level and reopen: the levels you've finished are
+      still there.

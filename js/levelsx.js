@@ -80,8 +80,8 @@
       L.pipe(42, 2);
       L.e('sprout', 48);
       L.row(52, R1, 'B?B');
-      // the harbour: three little boats bobbing, a short hop between each
-      L.plat(64, 14, 3, { bob: true }); L.plat(70, 13, 3, { bob: true }); L.plat(76, 14, 3, { bob: true });
+      // the harbour: three little boats bobbing in the water, a short hop between each
+      L.plat(64, 15, 3, { bob: true, look: 'boatR' }); L.plat(70, 15, 3, { bob: true, look: 'boatB' }); L.plat(76, 15, 3, { bob: true, look: 'boatG' });
       L.arc(64, 11, 15);
       L.e('xgull', 74, 7);
       L.ground(80, 160);
@@ -126,7 +126,7 @@
       L.notes(320, 16, 'EEE EEE EGCDE');
       cracker(L, 336);
       // the last of the harbour: two boats, then the quay to the cottage
-      L.plat(348, 14, 3, { bob: true }); L.plat(354, 13, 3, { bob: true });
+      L.plat(348, 15, 3, { bob: true, look: 'boatG' }); L.plat(354, 15, 3, { bob: true, look: 'boatR' });
       L.arc(347, 11, 12);
       L.ground(360, 440);
       L.semi(368, 374, 11); advent(L, 2, 371, 11);
@@ -490,7 +490,7 @@
       L.e('xcrab', 18); L.e('sprout', 26);
       L.e('xsnowman', 38);
       // a gap in the causeway: a little boat bobbing
-      L.plat(50, 14, 3, { bob: true });
+      L.plat(50, 15, 3, { bob: true, look: 'boatB' });
       L.arc(48, 11, 9);
       L.ground(56, 106);
       L.e('xsnowman', 64); L.e('xgull', 74, 8);

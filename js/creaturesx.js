@@ -600,6 +600,44 @@
     P(SUIT[2], rrect(68, -2, 74, 9, 1.2), function (x, y) { return y < 1 ? BOOT[2] : SUIT[2]; }, SUIT[0]),
     P(BOAT[4], rrect(2, 10, 94, 13, 1.2), null, BOAT[1])
   ]), 10);
+  /* The little harbour boats bobbing at their moorings, dressed for
+     Christmas: a painted hull (red, blue or green) with a white stripe and
+     two portholes, a holly wreath on the bow, and a string of coloured
+     lights from the bow up the mast and down to the stern. Their gunwale
+     is where you stand; the hull goes down to the water. */
+  var LIT = ['x', 'C', '}', 'M'];
+  var harbourBoat = function (t) {
+    var bot = function (x) { var u = (x - 31) / 29; return 41 + 14.4 * Math.sqrt(Math.max(0, 1 - u * u)); };
+    var hull = function (x, y) { return y > 29 && y < bot(x) && x > 1 + (y - 29) * 0.45 && x < 59 - (y - 29) * 0.25; };
+    var bulbs = [];
+    [[3, 28], [58, 28]].forEach(function (end, j) {
+      for (var k = 1; k < 5; k++) { var u = k / 5; bulbs.push([30 + (end[0] - 30) * u, 5 + (end[1] - 5) * u, (k + j * 2) % 4]); }
+    });
+    var bulbAt = function (x, y) {
+      for (var i = 0; i < bulbs.length; i++) { var b = bulbs[i], dx = x - b[0], dy = y - b[1]; if (dx * dx + dy * dy < 2.2) return b; }
+      return null;
+    };
+    var bulbCol = function (x, y) { return LIT[bulbAt(x + 0.5, y + 0.5)[2]]; };
+    return look(build(60, 56, [
+      P(WOOD[1], limb([[30, 4], [30, 30]], 0.9), null, WOOD[0]),
+      P('#', or(limb([[30, 5], [3, 28]], 0.6), limb([[30, 5], [58, 28]], 0.6)), null, null, '#'),
+      P('x', function (x, y) { return !!bulbAt(x, y); }, bulbCol, null, bulbCol),
+      P('x', tri(31, 1, 31, 7.4, 39, 4.2), null, null, 'v'),
+      P(t[2], hull, function (x, y) {
+        var Y = y + 0.5;
+        if (Y > bot(x + 0.5) - 3.4) return IRONB[2];
+        if (Y > 31.6 && Y < 34.6) return BOAT[3];
+        return orb(24, 26, 34, 30, t)(x, y);
+      }, t[0]),
+      P(GLASS[2], or(ell(33, 40, 1.9, 1.9), ell(43, 40, 1.9, 1.9)), function (x, y) { return (x + y) % 5 === 0 ? GLASS[4] : GLASS[2]; }),
+      P(WOOD[2], rrect(0.5, 27.4, 59.5, 31, 1.2), orb(20, 26, 30, 6, WOOD), WOOD[0]),
+      P(HOLLY[2], but(ell(14, 40, 4.4, 4.4), ell(14, 40, 2.1, 2.1)), function (x, y) { return Math.floor(Math.atan2(y + 0.5 - 40, x + 0.5 - 14) * 3.2 + 10) % 2 ? HOLLY[2] : HOLLY[3]; }, HOLLY[0]),
+      P('x', or(ell(12.2, 44.2, 1.7, 1.1), ell(15.8, 44.2, 1.7, 1.1)), null, 'v')
+    ]), 14);
+  };
+  LK.boatR = harbourBoat(RED);
+  LK.boatB = harbourBoat(POST);
+  LK.boatG = harbourBoat(HOLLY);
   /* Sark's horse and cart: a chestnut horse in harness, trotting, and the
      flat wooden cart behind him you stand on (its top is the cart's bed). */
   var cart = function (k) {
