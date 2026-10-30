@@ -157,11 +157,10 @@
       L.row(10, R1, '?P?');
       L.e('robin', 16); L.e('sprout', 24); L.e('robin', 30);
       L.e('leafpile', 36, 16, { snow: true }); L.coins(37, 15, 2);
-      // the frozen pond: slow to start, slower to stop
+      // the frozen pond: slow to start, slower to stop (nothing on it but stars: the ice is enough)
       L.coins(54, 13, 14);
-      L.e('sprout', 62);
       cracker(L, 76);
-      L.pipe(84, 3); L.e('sprout', 90); L.pipe(96, 4);
+      L.pipe(84, 3); L.e('sprout', 90); L.pipe(96, 3);
       // the first glasshouse: bounce up over it, or find the way through (a medal, an advent door)
       L.spring(100);
       den(L, 104, 10, 120);
@@ -183,8 +182,8 @@
       L.e('xsnowman', 240); L.e('sprout', 248);
       // a snowdrift with a medal in it: jump in!
       L.e('leafpile', 254, 16, { snow: true }); L.medal(255, 15);
-      // the big frozen pond
-      L.e('sprout', 270); L.row(276, R1, '?L?'); L.e('xsnowman', 286);
+      // the big frozen pond (one sprout on it, no snowman: sliding into a sneeze isn't fair)
+      L.e('sprout', 270); L.row(276, R1, '?L?');
       cracker(L, 298, 16, 'power');
       L.check(304);
       // the great glasshouse: climb it; Bear's sitting on its roof

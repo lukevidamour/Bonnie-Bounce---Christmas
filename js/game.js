@@ -157,7 +157,8 @@
       n: n, def: def, th: th, L: L, w: L.w, h: L.h, gr: L.gr,
       map: new Uint8Array(L.map), cont: new Uint8Array(L.cont), bt: new Uint8Array(L.w * L.h), bumps: [], multi: {},
       ents: [], fx: [], cam: { x: 0, y: 0 }, tick: 0, freeze: 0, shake: 0,
-      water: !!def.water, ice: !!def.ice || !!th.ice, check: fromCheck || 0, bossOn: false, bossDone: false,
+      // (frozen ponds, { ice: [[x0, x1], …] }, are ice only there — not the whole level, as level 2 was until 30 Oct)
+      water: !!def.water, ice: def.ice ? def.ice === true : !!th.ice, check: fromCheck || 0, bossOn: false, bossDone: false,
       ambient: [], gfx: theme(def.theme), deco: L.deco, blooms: [], hitstop: 0, kick: 0,
       hp: startHp(), hpMax: startHp(), hpGlow: 0, starHeal: 0, safe: null, secretIn: 0, secretFound: {}
     };
@@ -4148,22 +4149,28 @@
      up in a bubble on the last safe ground, stars and presents gave
      hearts back. All of that is still here and comes back on its own if
      HP_MAX goes up again (2 a heart: they're kept in half-hearts). With
-     one heart he's always full, so a heart from a present is points. */
-  var HP_MAX = 2;
+     one heart he's always full, so a heart from a present is points.
+     Christmas is new to him, so two hearts again (Luke, 30 Oct: Bonnie
+     "gave up on level 2"): a bump costs one and he carries on, a fall
+     bubbles him back to safe ground, and it's the flag only when both
+     are gone. */
+  var HP_MAX = 4;
   /* Bonnie's heart (20 Oct, his own idea: "a heart that gives you 1
-     extra heart"): a heart from a present adds a second heart for the
-     rest of the level — or fills it again if it's been lost. With two,
-     the three-heart rules above come back on their own: a bump costs one
-     and he carries on, a fall bubbles him back to safe ground. Back at a
-     flag after the last one goes, it's one heart again. */
-  var EXTRA_MAX = 4;
-  /* Winnie, at five the youngest, has the second heart from the start of
+     extra heart"): a heart from a present adds one more heart for the
+     rest of the level — or fills them all again if one's been lost.
+     Back at a flag after the last one goes, it's two again. */
+  var EXTRA_MAX = 6;
+  /* Winnie, at five the youngest, has the extra heart from the start of
      every level and every flag (Luke, 29 Oct: "to make it easier for
-     him"). Everyone else starts with one. */
-  var startHp = function () { return who() === 'winnie' && !BB.robot ? EXTRA_MAX : HP_MAX; };
+     him"). The robots play to the old, strictest rules (one heart, and
+     two with a present's), so a level they finish can be finished
+     without a single hit. */
+  var heartsCap = function () { return BB.robot ? 4 : EXTRA_MAX; };
+  var startHp = function () { return BB.robot ? 2 : who() === 'winnie' ? EXTRA_MAX : HP_MAX; };
   var extraHeart = function (x, y) {
-    if (G.hpMax >= EXTRA_MAX && G.hp >= G.hpMax) return false;
-    G.hpMax = EXTRA_MAX; G.hp = EXTRA_MAX; G.hpGlow = 50;
+    var cap = heartsCap();
+    if (G.hpMax >= cap && G.hp >= G.hpMax) return false;
+    G.hpMax = cap; G.hp = cap; G.hpGlow = 50;
     sfx('heal'); sfx('oneup');
     fx('heart', x, y, { vx: 0, vy: -0.6, life: 46 });
     fx('text', x - 4, y - 10, { s: 'YAY!', vy: -0.6, life: 50, col: '#ff94cc' });
@@ -4203,7 +4210,7 @@
     sfx('hurt');
     for (var i = 0; i < 4; i++) fx('spark', p.x + p.w / 2, p.y + 4, { vx: (i - 1.5) * 0.7, vy: -1.2, life: 26, col: '#ff6a8a' });
   };
-  /* A helping hand: fall into the same gap three times and a snow cloud
+  /* A helping hand: fall into the same gap twice and a snow cloud
      drifts in across it to walk over, there for the rest of the level
      (it stays through a restart at the flag). Never for the robots, who
      must prove every level can be done without it. */
@@ -4213,7 +4220,7 @@
     if (helpFalls.n !== G.n) helpFalls = { n: G.n, at: {}, bridges: [] };
     var key = Math.round(G.safe.x / 48);
     helpFalls.at[key] = (helpFalls.at[key] || 0) + 1;
-    if (helpFalls.at[key] < 3) return;
+    if (helpFalls.at[key] < 2) return;
     var br = findGap(G.safe);
     if (!br || helpFalls.bridges.some(function (b) { return b.x === br.x && b.row === br.row; })) return;
     helpFalls.bridges.push(br);
@@ -5965,9 +5972,13 @@
     // the stars count follows on from the hearts, however many there are
     BB.draw(ctx, A.starSmall, hx, 4.5);
     BB.text(ctx, pad(save.stars, 2), hx + 9, 4, { color: '#ffe048', outline: HUDINK });
-    if (bearWith === G.n) BB.draw(ctx, A.bearHead, hx + 24, 4);
-    if (princeWith === G.n && A.princeHead) BB.draw(ctx, A.princeHead, hx + (bearWith === G.n ? 34 : 24), 4);
-    BB.text(ctx, pad(save.score, 6), W / 2, 4, { color: '#ffffff', outline: HUDINK, align: 'center' });
+    /* Bear's and Prince's heads when they're following; on a narrow screen
+       with three hearts they'd run into the score, so they go beside the
+       medals instead */
+    var heads = [bearWith === G.n && A.bearHead, princeWith === G.n && A.princeHead].filter(Boolean), sc = pad(save.score, 6);
+    var tight = hx + 24 + heads.length * 10 > W / 2 - BB.textW(sc) / 2 - 2;
+    heads.forEach(function (h, i) { if (tight) BB.draw(ctx, h, 30 + i * 10, 13); else BB.draw(ctx, h, hx + 24 + i * 10, 4); });
+    BB.text(ctx, sc, W / 2, 4, { color: '#ffffff', outline: HUDINK, align: 'center' });
     var right = W - 2;
     if (BB.inputMode === 'touch') { BB.hud.pause = { on: 'screen', x: W - 18, y: 0, w: 18, h: 16 }; BB.icons.pause(ctx, W - 13, 2.5); right = W - 16; }
     else BB.hud.pause = null;

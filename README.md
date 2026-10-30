@@ -201,14 +201,17 @@ The friends:
   behind. **Balloons** float you up into the sky. **Snowdrifts** are for
   jumping in (one or two hide a medal).
 
-**Hearts:** you have one. A bump while small, or a fall into the sea or
-a pit, and you start again from the flag. Lives are unlimited. When
-you're big (a cupcake), a bump shrinks you first; a paper crown goes
-before that. A **heart** from a present gives a second heart for the rest
-of the level. **Winnie**, at five the youngest, has the second heart from
-the start of every level and every flag.
+**Hearts:** you have two. A bump costs one and you carry on; a fall into
+the sea or a pit costs one and you pop back up in a bubble on safe
+ground. Lose both and you start again from the flag. Lives are
+unlimited, and every 12 stars give half a heart back. When you're big (a
+cupcake), a bump shrinks you first; a paper crown goes before that. A
+**heart** from a present gives a third heart for the rest of the level.
+**Winnie**, at five the youngest, has the third heart from the start of
+every level and every flag. (It was one heart until 30 Oct, when Bonnie
+gave up on level 2: `HP_MAX` in game.js, two to a heart.)
 
-**A helping hand:** fall into the same gap three times and a **snow
+**A helping hand:** fall into the same gap twice and a **snow
 cloud** drifts in across it (HOP ON THE CLOUD!), there for the rest of
 the level, even after a restart at the flag. The robots play without it.
 
@@ -251,7 +254,7 @@ level without finishing the one before, one per tap.
 **TURNS** is for children sharing one game. Tap it to choose who's
 sharing: BEAU+WINNIE, BONNIE+BEAU, BONNIE+WINNIE or ALL THREE (or OFF).
 Then at every flag, and at the end of every level, it's the next one's
-go: "WINNIE'S TURN!", with a sparkle, and Winnie's second heart. The
+go: "WINNIE'S TURN!", with a sparkle, and Winnie's third heart. The
 choice stays on that device, through a new game too.
 
 ## Two editions, one address
@@ -371,6 +374,11 @@ Last full run, 29 Oct:
   original's did at its bosses.
 - **Touch:** checked at iPad size (1024×768) with `?touch`: the level,
   the sticker book and the map.
+
+30 Oct, after making it easier (two hearts, the snow cloud after two
+falls, and level 2's ice only on its ponds, as it was meant to be): all
+11 levels still finish, and level 2's medals, Bear, Prince and stuck hunt
+all pass again.
 
 ### First-play review (29 Oct)
 
